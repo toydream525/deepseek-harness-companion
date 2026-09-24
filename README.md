@@ -9,7 +9,7 @@
 
   `v0.1.0` · `Windows x64` · [`MIT`](LICENSE)
 
-  **安装包准备发布** · [查看发布页](https://github.com/toydream525/deepseek-harness-companion/releases) · **[详细配置说明](docs/GETTING_STARTED.zh-CN.md)** · [项目主页](https://yuriaqua.com/harness)
+  **[下载安装版](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-Setup-v0.1.0-windows-x64.exe)** · [便携 ZIP](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-v0.1.0-windows-x64.zip) · **[详细配置说明](docs/GETTING_STARTED.zh-CN.md)** · [项目主页](https://yuriaqua.com/harness)
 
   <small>模型与运行环境准备见<a href="docs/GETTING_STARTED.zh-CN.md">详细配置说明</a>。</small>
 </div>
