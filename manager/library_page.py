@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, QUrl, Signal
+from PySide6.QtCore import Qt, QTimer, QUrl, Signal, QSize
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFileDialog, QFrame, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QScrollArea, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
+    QTabWidget, QMenu, QHeaderView,
 )
 
 import hf_downloads
@@ -59,8 +60,8 @@ class LibraryPage(QWidget):
         body.setObjectName("pageSurface")
         scroll.setWidget(body)
         page = QVBoxLayout(body)
-        page.setContentsMargins(26, 22, 26, 24)
-        page.setSpacing(18)
+        page.setContentsMargins(28, 24, 28, 24)
+        page.setSpacing(24)
         title = QLabel("模型库与下载")
         title.setObjectName("pageTitle")
         page.addWidget(title)
@@ -77,13 +78,24 @@ class LibraryPage(QWidget):
         self.favorites.toggled.connect(self.refresh_models)
         bar.addWidget(self.search, 1)
         bar.addWidget(self.favorites)
-        bar.addWidget(_button("重新扫描", self.scan_models))
-        bar.addWidget(_button("扫描指定目录", self.scan_directory))
-        bar.addWidget(_button("添加已有 GGUF", self.add_model))
+        bar.addWidget(_button("添加已有 GGUF", self.add_model, True))
+        more = _button("更多", lambda: None)
+        scan_menu = QMenu(more)
+        scan_menu.addAction("重新扫描已知位置", self.scan_models)
+        scan_menu.addAction("扫描指定目录", self.scan_directory)
+        more.setMenu(scan_menu)
+        bar.addWidget(more)
         cat_layout.addLayout(bar)
         self.models = QTreeWidget()
         self.models.setHeaderLabels(["模型", "架构", "量化", "大小", "状态", "来源"])
-        self.models.setMinimumHeight(225)
+        self.models.setMinimumHeight(340)
+        self.models.setAlternatingRowColors(True)
+        self.models.setUniformRowHeights(True)
+        self.models.setIndentation(0)
+        self.models.setTextElideMode(Qt.TextElideMode.ElideMiddle)
+        self.models.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        for column in range(1, 6):
+            self.models.header().setSectionResizeMode(column, QHeaderView.ResizeMode.ResizeToContents)
         self.models.itemSelectionChanged.connect(self._selection_changed)
         cat_layout.addWidget(self.models)
         action_row = QHBoxLayout()
@@ -93,8 +105,9 @@ class LibraryPage(QWidget):
         cat_layout.addLayout(action_row)
         self.model_detail = QLabel("请选择模型查看文件状态。")
         self.model_detail.setWordWrap(True)
+        self.model_detail.setObjectName("sectionHint")
+        self.model_detail.setMaximumHeight(96)
         cat_layout.addWidget(self.model_detail)
-        page.addWidget(catalog)
 
         download, dl_layout = _card("从 Hugging Face 下载 GGUF")
         link_row = QHBoxLayout()
@@ -150,7 +163,10 @@ class LibraryPage(QWidget):
             task_actions.addWidget(widget)
         task_actions.addStretch()
         dl_layout.addLayout(task_actions)
-        page.addWidget(download)
+        tabs = QTabWidget()
+        tabs.addTab(catalog, "本地模型")
+        tabs.addTab(download, "从 Hugging Face 下载")
+        page.addWidget(tabs, 1)
         page.addStretch()
         QTimer.singleShot(0, self.refresh_models)
         QTimer.singleShot(0, self.refresh_token_state)
@@ -188,10 +204,11 @@ class LibraryPage(QWidget):
                                     str(row.get("quantization") or "未知"), size_text,
                                     state, str(row.get("source") or "本地")])
             item.setData(0, Qt.ItemDataRole.UserRole, row.get("id"))
+            item.setSizeHint(0, QSize(0, 40))
+            item.setToolTip(0, str(row.get("path") or name))
             self.models.addTopLevelItem(item)
             if row.get("id") == previous:
                 self.models.setCurrentItem(item)
-        self.models.resizeColumnToContents(0)
 
     def selected_model_id(self):
         item = self.models.currentItem()

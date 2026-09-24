@@ -20,7 +20,7 @@ def app_stylesheet() -> str:
     QWidget {
         color: #E7EEF8;
         font-family: "Microsoft YaHei UI";
-        font-size: 10.5pt;
+        font-size: 11pt;
     }
     QWidget#mainWindow, QDialog {
         background-color: #0B1220;
@@ -63,10 +63,10 @@ def app_stylesheet() -> str:
         font-weight: 700;
         padding: 8px 4px 18px 4px;
     }
-    QLabel#sidebarSubtitle, QLabel#pageSubtitle { color: #94A3B8; }
+    QLabel#sidebarSubtitle, QLabel#pageSubtitle { color: #A9BBCD; font-size: 10.5pt; }
     QLabel#pageTitle {
         color: #F8FAFC;
-        font-size: 18pt;
+        font-size: 19.5pt;
         font-weight: 700;
         padding: 2px 0 8px 0;
     }
@@ -128,13 +128,26 @@ def app_stylesheet() -> str:
     }
     QLabel#cardTitle {
         color: #DCE8F5;
-        font-size: 11.25pt;
+        font-size: 12pt;
         font-weight: 700;
     }
+    QLabel#sectionTitle {
+        color: #DCE8F5;
+        font-size: 12pt;
+        font-weight: 700;
+        padding: 0 0 5px 0;
+    }
+    QLabel#sectionHint { color: #94A3B8; font-size: 10.5pt; }
     QWidget#card, QFrame#card {
         background-color: #111C30;
         border: 1px solid #26364E;
         border-radius: 16px;
+    }
+    QFrame#subsection {
+        background-color: #142238;
+        border: 1px solid #2A3C55;
+        border-radius: 12px;
+        padding: 10px;
     }
     QWidget#heroCard, QFrame#heroCard {
         background-color: #13243A;
@@ -271,6 +284,7 @@ def app_stylesheet() -> str:
         border-radius: 9px;
         padding: 9px 11px;
         selection-background-color: #0F766E;
+        min-height: 20px;
     }
     QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus,
     QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
@@ -328,15 +342,27 @@ def app_stylesheet() -> str:
         border: 1px solid #344760;
         border-radius: 7px;
         selection-background-color: #164E63;
+        alternate-background-color: #15243A;
     }
     QTreeWidget {
         background-color: #111C30;
-        alternate-background-color: #172840;
+        alternate-background-color: #15243A;
         color: #E7EEF8;
         border: 1px solid #344760;
         border-radius: 7px;
         selection-background-color: #164E63;
     }
+    QTreeWidget::item { min-height: 40px; padding: 4px 6px; }
+    QTreeWidget::item:selected { background-color: #164E63; color: #F8FAFC; }
+    QListWidget {
+        background-color: #0D1728;
+        color: #E7EEF8;
+        border: 1px solid #344760;
+        border-radius: 9px;
+        outline: 0;
+    }
+    QListWidget::item { padding: 7px 9px; border-radius: 7px; }
+    QListWidget::item:selected { background-color: #164E63; color: #F8FAFC; }
     QHeaderView::section {
         background-color: #1B2B40;
         color: #CBD5E1;

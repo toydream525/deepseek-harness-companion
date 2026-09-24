@@ -14,7 +14,7 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout, QInputDialog,
     QLabel, QLineEdit, QMessageBox, QPushButton, QScrollArea, QTextEdit,
-    QVBoxLayout, QWidget,
+    QVBoxLayout, QWidget, QBoxLayout,
 )
 
 import model_catalog
@@ -73,8 +73,8 @@ class PresetsPage(QWidget):
         body.setObjectName("pageSurface")
         scroll.setWidget(body)
         page = QVBoxLayout(body)
-        page.setContentsMargins(26, 22, 26, 24)
-        page.setSpacing(18)
+        page.setContentsMargins(28, 24, 28, 24)
+        page.setSpacing(24)
         title = QLabel("参数预设")
         title.setObjectName("pageTitle")
         page.addWidget(title)
@@ -106,13 +106,47 @@ class PresetsPage(QWidget):
         template_row.addWidget(self.template_mode)
         template_row.addWidget(self.template_path, 1)
         template_row.addWidget(self.template_browse)
+        template_row.addWidget(_btn("复制路径", lambda: self.host.copy_text(self.template_path.text())))
         card_layout.addLayout(template_row)
         self._template_mode_changed()
-        self.form = QFormLayout()
-        self.form.setSpacing(10)
-        card_layout.addLayout(self.form)
+        save_top = QHBoxLayout()
+        for label, fn in (("另存为新预设", self.save_as), ("覆盖当前预设", self.save_replace),
+                          ("查看差异", self.show_diff)):
+            save_top.addWidget(_btn(label, fn, label == "另存为新预设"))
+        save_top.addStretch()
+        card_layout.addLayout(save_top)
+        groups = QHBoxLayout()
+        groups.setSpacing(18)
+        self.parameter_groups = groups
+        generation = QFrame()
+        generation.setObjectName("subsection")
+        generation_layout = QVBoxLayout(generation)
+        generation_heading = QLabel("生成 · 思考、上下文与采样")
+        generation_heading.setObjectName("sectionTitle")
+        generation_layout.addWidget(generation_heading)
+        generation_layout.addWidget(QLabel("单次输出上限在试聊或 DSH 请求中设置。"))
+        self.generation_form = QFormLayout()
+        self.generation_form.setSpacing(10)
+        generation_layout.addLayout(self.generation_form)
+        generation_layout.addStretch()
+        runtime = QFrame()
+        runtime.setObjectName("subsection")
+        runtime_layout = QVBoxLayout(runtime)
+        runtime_heading = QLabel("运行 · 显存层、KV 与批量")
+        runtime_heading.setObjectName("sectionTitle")
+        runtime_layout.addWidget(runtime_heading)
+        self.runtime_form = QFormLayout()
+        self.runtime_form.setSpacing(10)
+        runtime_layout.addLayout(self.runtime_form)
+        runtime_layout.addStretch()
+        groups.addWidget(generation, 1)
+        groups.addWidget(runtime, 1)
+        card_layout.addLayout(groups)
         self.advanced_toggle = _btn("展开高级参数", self.toggle_advanced)
-        card_layout.addWidget(self.advanced_toggle)
+        advanced_row = QHBoxLayout()
+        advanced_row.addWidget(self.advanced_toggle)
+        advanced_row.addStretch()
+        card_layout.addLayout(advanced_row)
         self.advanced_panel = QWidget()
         self.advanced_form = QFormLayout(self.advanced_panel)
         self.advanced_form.setSpacing(10)
@@ -129,12 +163,6 @@ class PresetsPage(QWidget):
         self.estimate_label = QLabel("显存值仅为估算，实际占用以运行状态为准。")
         self.estimate_label.setWordWrap(True)
         card_layout.addWidget(self.estimate_label)
-        save_top = QHBoxLayout()
-        for label, fn in (("查看差异", self.show_diff), ("另存为新预设", self.save_as),
-                          ("覆盖当前预设", self.save_replace)):
-            save_top.addWidget(_btn(label, fn, label == "另存为新预设"))
-        save_top.addStretch()
-        card_layout.addLayout(save_top)
         save_bottom = QHBoxLayout()
         save_bottom.addWidget(_btn("重置预设", self.reset))
         save_bottom.addWidget(_btn("恢复整个预设库备份", self.restore))
@@ -148,7 +176,7 @@ class PresetsPage(QWidget):
         import_layout.setContentsMargins(20, 18, 20, 18)
         import_layout.addWidget(QLabel("导入、导出与差异预览"))
         recipe_row = QHBoxLayout()
-        recipe_row.addWidget(_btn("一键导入原提示词配置", self.host.import_original_prompt_recipe, True))
+        recipe_row.addWidget(_btn("一键导入原提示词配置", self.host.import_original_prompt_recipe))
         recipe_row.addWidget(_btn("导入本地配套配置包", self.host.import_external_recipe))
         recipe_row.addWidget(_btn("导出当前配套配置", self.host.export_current_recipe))
         recipe_row.addStretch()
@@ -173,6 +201,12 @@ class PresetsPage(QWidget):
         page.addWidget(import_card)
         page.addStretch()
         QTimer.singleShot(0, self.refresh_all)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.parameter_groups.setDirection(
+            QBoxLayout.Direction.TopToBottom if self.width() < 940
+            else QBoxLayout.Direction.LeftToRight)
 
     def refresh_all(self):
         self.models_loaded = False
@@ -243,15 +277,18 @@ class PresetsPage(QWidget):
             return
         self.capabilities_ready = True
         self.capabilities = data
-        while self.form.rowCount():
-            self.form.removeRow(0)
+        for form in (self.generation_form, self.runtime_form):
+            while form.rowCount():
+                form.removeRow(0)
         while self.advanced_form.rowCount():
             self.advanced_form.removeRow(0)
         self.fields = {}
         fields = data.get("fields") or {}
         current_params = (self.current or {}).get("parameters") or {}
         sources = []
-        for field_index, (key, label) in enumerate(PARAMETERS):
+        generation_keys = {"reasoning_effort", "ctx_size", "reasoning_budget", "temp", "top_p"}
+        runtime_keys = {"ngl", "cache_type_k", "cache_type_v", "batch_size", "ubatch_size"}
+        for key, label in PARAMETERS:
             spec = fields.get(key) or {}
             choices = spec.get("supported_choices") or []
             widget = QComboBox()
@@ -279,7 +316,10 @@ class PresetsPage(QWidget):
             source = spec.get("source") or "unknown"
             sources.append(f"{label}：{SOURCE_LABELS.get(source, '未知')} ({source})")
             widget.setToolTip(f"能力依据：{SOURCE_LABELS.get(source, '未知')}\n内部来源：{source}")
-            (self.form if field_index < 8 else self.advanced_form).addRow(label, widget)
+            widget.setMinimumWidth(170)
+            target = (self.generation_form if key in generation_keys else
+                      self.runtime_form if key in runtime_keys else self.advanced_form)
+            target.addRow(label, widget)
             self.fields[key] = (widget, spec)
         thinking = data.get("thinking") or {}
         thinking_mode = "已验证" if thinking.get("mode") == "verified" else "未知"

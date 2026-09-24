@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit,
     QMessageBox, QPushButton, QScrollArea, QTextEdit, QVBoxLayout, QWidget,
     QDialog, QDialogButtonBox, QListWidget, QListWidgetItem, QTableWidget,
-    QTableWidgetItem, QHeaderView,
+    QTableWidgetItem, QHeaderView, QMenu, QBoxLayout,
 )
 from button_feedback import connect_button
 
@@ -53,8 +53,8 @@ class ProviderPage(QWidget):
         body.setObjectName("pageSurface")
         scroll.setWidget(body)
         page = QVBoxLayout(body)
-        page.setContentsMargins(26, 22, 26, 24)
-        page.setSpacing(18)
+        page.setContentsMargins(28, 24, 28, 24)
+        page.setSpacing(24)
         heading = QLabel("DSH 与提供方")
         heading.setObjectName("pageTitle")
         page.addWidget(heading)
@@ -69,13 +69,20 @@ class ProviderPage(QWidget):
         self.dsh_state.setWordWrap(True)
         dsh_layout.addWidget(self.dsh_state)
         first = QHBoxLayout()
-        for text, method in (("检测", self.detect_dsh), ("组件设置与官方下载", host.open_components_settings),
-                             ("启动", host.start_dsh), ("打开认证界面", host.open_dsh),
-                             ("停止本窗口启动实例", host.stop_dsh),
-                             ("选择实例强制停止", host.force_stop_dsh)):
-            widget = _btn(text, method)
+        for text, method in (("连接 / 检测", self.detect_dsh), ("启动 DSH", host.start_dsh),
+                             ("打开认证界面", host.open_dsh)):
+            widget = _btn(text, method, text == "打开认证界面")
             first.addWidget(widget)
             self._conflict_widgets.append(widget)
+        more = _btn("更多操作", lambda: None)
+        menu = QMenu(more)
+        menu.addAction("组件设置与官方下载", host.open_components_settings)
+        menu.addSeparator()
+        menu.addAction("停止本窗口启动实例", host.stop_dsh)
+        menu.addAction("选择实例强制停止", host.force_stop_dsh)
+        more.setMenu(menu)
+        first.addWidget(more)
+        self._conflict_widgets.append(more)
         first.addStretch()
         dsh_layout.addLayout(first)
         for caption, attribute in (("DSH 页面地址", "page_link"), ("DSH 认证链接（含令牌）", "verified_link")):
@@ -104,16 +111,29 @@ class ProviderPage(QWidget):
         provider_layout = QVBoxLayout(providers)
         provider_layout.setContentsMargins(20, 18, 20, 18)
         provider_layout.addWidget(QLabel("模型提供方"))
-        select_row = QHBoxLayout()
+        content = QHBoxLayout()
+        content.setSpacing(18)
+        self.provider_content = content
+        left = QVBoxLayout()
+        left.addWidget(QLabel("已配置"))
+        self.provider_list = QListWidget()
+        self.provider_list.setMinimumWidth(210)
+        self.provider_list.setMaximumWidth(250)
+        self.provider_list.setMinimumHeight(300)
+        self.provider_list.currentRowChanged.connect(lambda index: self.provider_combo.setCurrentIndex(index))
+        left.addWidget(self.provider_list, 1)
         self.provider_combo = QComboBox()
         self.provider_combo.currentIndexChanged.connect(self._provider_selected)
-        select_row.addWidget(self.provider_combo, 1)
+        select_row = QHBoxLayout()
         new_btn = _btn("新建", self.new_provider)
         refresh_btn = _btn("刷新", self.refresh_providers)
         select_row.addWidget(new_btn)
         select_row.addWidget(refresh_btn)
         self._conflict_widgets.extend((new_btn, refresh_btn))
-        provider_layout.addLayout(select_row)
+        left.addLayout(select_row)
+        content.addLayout(left)
+        editor = QVBoxLayout()
+        editor.addWidget(QLabel("提供方设置"))
         form = QFormLayout()
         self.name_edit = QLineEdit()
         self.kind_combo = QComboBox()
@@ -139,26 +159,36 @@ class ProviderPage(QWidget):
         form.addRow("API 地址", self.base_url_edit)
         form.addRow("接口协议", self.api_combo)
         form.addRow("访问密钥", self.key_edit)
-        provider_layout.addLayout(form)
-        provider_layout.addWidget(QLabel("模型配置（目录继承的提供方可留空，保留 DSH 原设置）"))
-        provider_layout.addWidget(self.models_table)
+        editor.addLayout(form)
+        editor.addWidget(QLabel("模型配置 · 目录继承项可留空"))
+        editor.addWidget(self.models_table)
         model_actions = QHBoxLayout()
         model_actions.addWidget(_btn("添加模型行", self.add_model_row))
         model_actions.addWidget(_btn("删除选中模型行", self.remove_model_row))
         model_actions.addStretch()
-        provider_layout.addLayout(model_actions)
+        editor.addLayout(model_actions)
         operation_row = QHBoxLayout()
-        for text, method in (("保存提供方", self.save_provider), ("删除", self.delete_provider),
-                             ("发现模型", self.discover_models), ("连接测试", self.test_provider),
+        for text, method in (("发现模型", self.discover_models), ("连接测试", self.test_provider),
                              ("去 DSH 会话生成测试", self.test_generation)):
-            widget = _btn(text, method, text == "保存提供方")
+            widget = _btn(text, method)
             operation_row.addWidget(widget)
             self._conflict_widgets.append(widget)
         operation_row.addStretch()
-        provider_layout.addLayout(operation_row)
+        editor.addLayout(operation_row)
+        save_row = QHBoxLayout()
+        save_provider_btn = _btn("保存提供方", self.save_provider)
+        delete_provider_btn = _btn("删除提供方", self.delete_provider)
+        delete_provider_btn.setObjectName("dangerButton")
+        save_row.addWidget(save_provider_btn)
+        save_row.addStretch()
+        save_row.addWidget(delete_provider_btn)
+        self._conflict_widgets.extend((save_provider_btn, delete_provider_btn))
+        editor.addLayout(save_row)
         self.provider_info = QLabel("密钥不会回显，也不会进入诊断包。")
         self.provider_info.setWordWrap(True)
-        provider_layout.addWidget(self.provider_info)
+        editor.addWidget(self.provider_info)
+        content.addLayout(editor, 1)
+        provider_layout.addLayout(content)
         page.addWidget(providers)
 
         workflow = QFrame()
@@ -207,6 +237,13 @@ class ProviderPage(QWidget):
         page.addStretch()
         QTimer.singleShot(0, self.refresh_all)
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        narrow = self.width() < 900
+        self.provider_content.setDirection(
+            QBoxLayout.Direction.TopToBottom if narrow else QBoxLayout.Direction.LeftToRight)
+        self.provider_list.setMaximumWidth(16777215 if narrow else 250)
+
     def refresh_all(self):
         self.detect_dsh()
         self.refresh_providers()
@@ -223,9 +260,12 @@ class ProviderPage(QWidget):
     def _show_detect(self, result):
         self.current_status = result if isinstance(result, dict) else {}
         data = self.current_status.get("data") or {}
+        def readable(value, positive, negative):
+            return positive if value is True else negative if value is False else "未知"
         self.dsh_state.setText(
             f"{result.get('message', '状态未知')}\n"
-            f"安装：{data.get('installed', '未知')} · 运行：{data.get('running', '未知')} · "
+            f"安装：{readable(data.get('installed'), '已安装', '未安装')} · "
+            f"运行：{readable(data.get('running'), '运行中', '未运行')} · "
             f"版本：{data.get('version', '未知')}")
         self.host.refresh_dsh()
 
@@ -274,6 +314,12 @@ class ProviderPage(QWidget):
             if index >= 0:
                 self.provider_combo.setCurrentIndex(index)
         self.provider_combo.blockSignals(False)
+        self.provider_list.blockSignals(True)
+        self.provider_list.clear()
+        for row in rows:
+            self.provider_list.addItem(str(row.get("display_name") or row.get("id")))
+        self.provider_list.setCurrentRow(self.provider_combo.currentIndex())
+        self.provider_list.blockSignals(False)
         self._provider_selected()
 
     def _selected_provider(self):
@@ -281,6 +327,9 @@ class ProviderPage(QWidget):
         return next((row for row in self.providers if row.get("id") == provider_id), None)
 
     def _provider_selected(self):
+        self.provider_list.blockSignals(True)
+        self.provider_list.setCurrentRow(self.provider_combo.currentIndex())
+        self.provider_list.blockSignals(False)
         row = self._selected_provider()
         if not row:
             return
@@ -299,6 +348,7 @@ class ProviderPage(QWidget):
 
     def new_provider(self):
         self.provider_combo.setCurrentIndex(-1)
+        self.provider_list.clearSelection()
         self.name_edit.clear()
         self.kind_combo.setCurrentIndex(0)
         self.base_url_edit.clear()
@@ -606,6 +656,7 @@ class ProviderPage(QWidget):
         for widget in self._conflict_widgets:
             widget.setEnabled(not locked)
         self.provider_combo.setEnabled(not locked)
+        self.provider_list.setEnabled(not locked)
         self.models_table.setEnabled(not locked)
         self.local_work_btn.setEnabled(not locked)
         self.start_work_btn.setEnabled(not locked)
