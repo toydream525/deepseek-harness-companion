@@ -58,14 +58,14 @@
 2. 在「模型库与下载」添加文件，然后到「工作台」点「一键导入原提示词配置」，在预览中绑定这台电脑的模型和模板路径；缺少资源会提示，可稍后补齐。
 3. 选已绑定预设、启动模型并在「试聊」验证。要用 DSH，再从首页完成本地模型接入 DSH，并在新会话验证。
 
-| 模式 | 用途 | 优势与取舍 | 手动下载模型 |
-|---|---|---|---|
-| [思考 32K](scripts/deploy/Uncensored32K.cmd) | 复杂代码、分析、多步任务 | 给推理留空间；等待、资源与输出预算通常更高 | [Huihui IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
-| [Direct 32K](scripts/deploy/UncensoredDirect32K.cmd) | 日常问答、改写、快速交互 | 回答更直接；复杂推理结果需要复核 | [同上 IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
-| [原版 32K](scripts/deploy/Original32K.cmd) | 保留原版行为、做对照任务 | 便于比较输出；仍需较多资源，行为可能更保守（推断） | [ISTA IQ3_S](https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main) |
-| [写作 8K](scripts/deploy/Writing8K-unverified.cmd) | 长文创作、改写 | 较高量化精度一般预期损失较少，未据此断言质量提升；文件更大、上下文较短 | [Huihui UD-IQ4_XS](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+| 方案 | 模型类型 | 思考 | 适合用途 | 主要取舍 | 模型下载 |
+|---|---|---|---|---|---|
+| [思考 32K](scripts/deploy/Uncensored32K.cmd) | Huihui 去限制版 | 开启 | 复杂代码、分析、多步任务 | 等待通常更久 | [Huihui IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+| [快速 32K（Direct）](scripts/deploy/UncensoredDirect32K.cmd) | Huihui 去限制版 | 关闭 | 日常问答、改写 | 复杂任务建议切思考档 | [Huihui IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+| [原版 32K](scripts/deploy/Original32K.cmd) | Qwen 原版（非去限制版） | 开启 | 保留原版行为的通用任务 | 相对去限制版更偏原版响应策略 | [ISTA IQ3_S](https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main) |
+| [写作 8K](scripts/deploy/Writing8K-unverified.cmd) | Huihui 去限制版 | 开启 | 写作、改写 | IQ4 文件更大；上下文为 8K | [Huihui UD-IQ4_XS](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
 
-<small>参考环境：NVIDIA 16GB 显存、64GB 系统内存；其他硬件请按<a href="docs/GETTING_STARTED.zh-CN.md#qwen-参考方案">详细指南</a>调整。</small>
+<small>32K / 8K 是上下文长度；“去限制版”不代表零拒答或更准确。参考环境：NVIDIA 16GB 显存、64GB 系统内存；其他硬件请按<a href="docs/GETTING_STARTED.zh-CN.md#qwen-参考方案">详细指南</a>调整。</small>
 
 ## 文档
 

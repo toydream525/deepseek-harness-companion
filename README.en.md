@@ -58,14 +58,14 @@ Use **Import original prompt setup** inside the app, or choose a launcher in `sc
 2. Add the model under **Model Library & Downloads**, then use **Import original prompt setup** in Workbench. Bind this computer's model and template paths in the preview; missing resources are shown and can be supplied later.
 3. Select the bound preset, start the model, and verify a real answer in Trial Chat. To use DSH, complete the home-page DSH connection and check a new conversation.
 
-| Mode | Intended use | Benefit and tradeoff | Manually download |
-|---|---|---|---|
-| [Thinking 32K](scripts/deploy/Uncensored32K.cmd) | Complex code, analysis, multi-step tasks | Leaves room for reasoning; generally more waiting, resources, and output budget | [Huihui IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
-| [Direct 32K](scripts/deploy/UncensoredDirect32K.cmd) | Everyday questions, rewriting, quick interaction | More direct answers; review complex reasoning results | [Same IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
-| [Original 32K](scripts/deploy/Original32K.cmd) | Original model behavior, comparison tasks | Useful as a comparison; still resource-heavy and may be more conservative (inference) | [ISTA IQ3_S](https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main) |
-| [Writing 8K](scripts/deploy/Writing8K-unverified.cmd) | Long-form drafting and rewriting | Higher quantization precision is generally expected to reduce loss, not proven quality here; larger file and shorter context | [Huihui UD-IQ4_XS](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+| Preset | Model type | Reasoning | Best for | Main tradeoff | Model download |
+|---|---|---|---|---|---|
+| [Thinking 32K](scripts/deploy/Uncensored32K.cmd) | Huihui abliterated variant | On | Complex code, analysis, multi-step tasks | Usually longer wait | [Huihui IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+| [Fast 32K (Direct)](scripts/deploy/UncensoredDirect32K.cmd) | Huihui abliterated variant | Off | Everyday questions, rewriting | Use Thinking for complex tasks | [Huihui IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+| [Original 32K](scripts/deploy/Original32K.cmd) | Original Qwen (not abliterated) | On | General tasks needing original behavior | Follows original response behavior more closely | [ISTA IQ3_S](https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main) |
+| [Writing 8K](scripts/deploy/Writing8K-unverified.cmd) | Huihui abliterated variant | On | Writing, rewriting | Larger IQ4 file; 8K context | [Huihui UD-IQ4_XS](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
 
-<small>Reference hardware: NVIDIA 16GB VRAM and 64GB system RAM. Adjust for other hardware with the <a href="docs/GETTING_STARTED.en.md#qwen-reference-setup">detailed guide</a>.</small>
+<small>32K / 8K refer to context length. Abliterated does not mean zero refusals or higher accuracy. Reference hardware: NVIDIA 16GB VRAM and 64GB RAM; adjust other hardware with the <a href="docs/GETTING_STARTED.en.md#qwen-reference-setup">detailed guide</a>.</small>
 
 ## Documentation
 
