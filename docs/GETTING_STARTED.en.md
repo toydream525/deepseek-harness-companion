@@ -43,6 +43,8 @@ Only DSH users need [official Node.js](https://nodejs.org/en/download) and [Deep
 
 Under **Settings & Diagnostics → DSH Components**, select the DSH folder and `node.exe` until both pass detection. Under **DSH & Providers**, start an app-managed DSH or paste the original authenticated URL of an existing external instance. The app cannot obtain an external instance's token automatically. After starting a local model, the home-page one-click action checks model readiness, DSH, local provider registration, and the default for new sessions. You can also perform each step on the DSH page. Finally create a new DSH conversation and verify it works. A successful Trial Chat alone does not prove DSH integration.
 
+Under **DSH & Providers**, you can add, edit, or delete local-model and cloud-API providers, including their API URL, protocol, and model list. Enter and save access keys in the app; saved keys are not displayed again. After a connection test, select a model and set it as the **default for future new sessions**. Existing DSH conversations are not rewritten; create a new one to verify the choice.
+
 Local API, DSH page, and verified authenticated links are selectable and copyable in their pages. The authenticated link contains a token; use it only in a trusted context. Diagnostic exports exclude it. Closing the app cleans up DSH instances started by the app, while external instances remain running.
 
 ## Daily use and migration

@@ -16,7 +16,7 @@
 
 ![DSH Companion desktop](docs/images/app-preview.png)
 
-Choose a GGUF model, start a local API, try a chat, and connect that model to DSH from one desktop app.
+Choose a GGUF model, start a local API, try a chat, and manage local or cloud model providers for DSH from one desktop app.
 
 ## What it does
 
@@ -24,7 +24,7 @@ Choose a GGUF model, start a local API, try a chat, and connect that model to DS
 |---|---|
 | Local models | Add GGUF files, choose presets, start/stop, see readiness |
 | Trial chat | Verify a real answer and inspect effective parameters |
-| DSH integration | Detect or connect DSH, register a local provider, set the new-session default |
+| Harness providers and APIs | Detect or connect DSH; add, edit, or delete local and cloud providers, configure API URLs, protocols and model lists, securely save keys, and set the default model for future new sessions |
 | Portable settings | Import/export presets and setup bundles; rebind missing files |
 
 ## Start in three steps
