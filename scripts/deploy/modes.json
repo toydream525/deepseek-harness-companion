@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "recipe_id": "qwen38-original-prompt",
+  "engine_page": "https://github.com/ggml-org/llama.cpp/releases/tag/b11149",
+  "template_page": "https://huggingface.co/froggeric/Qwen-Fixed-Chat-Templates/tree/855bffc",
+  "modes": [
+    {
+      "id": "Uncensored32K",
+      "preset_id": "recipe-qwen38-uncensored-32k-v1",
+      "model_filename": "Huihui-Qwen3.8-27B-abliterated-GSQ-RCO-IQ3_S.gguf",
+      "model_page": "https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main",
+      "source_host_verified": true,
+      "label": "Uncensored 32K thinking"
+    },
+    {
+      "id": "UncensoredDirect32K",
+      "preset_id": "recipe-qwen38-uncensored-direct-32k-v1",
+      "model_filename": "Huihui-Qwen3.8-27B-abliterated-GSQ-RCO-IQ3_S.gguf",
+      "model_page": "https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main",
+      "source_host_verified": true,
+      "label": "Uncensored Direct 32K"
+    },
+    {
+      "id": "Original32K",
+      "preset_id": "recipe-qwen38-original-32k-v1",
+      "model_filename": "Qwen3.8-27B-GSQ-RCO-IQ3_S.gguf",
+      "model_page": "https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main",
+      "source_host_verified": true,
+      "label": "Original 32K thinking"
+    },
+    {
+      "id": "Writing8K",
+      "preset_id": "recipe-qwen38-writing-iq4-8k-v1",
+      "model_filename": "Huihui-Qwen3.8-27B-abliterated-UD-IQ4_XS.gguf",
+      "model_page": "https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main",
+      "source_host_verified": false,
+      "label": "Writing 8K (unverified; not recommended by default)"
+    }
+  ]
+}

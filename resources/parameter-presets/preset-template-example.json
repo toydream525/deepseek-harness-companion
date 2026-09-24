@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "kind": "dsh-companion-presets",
+  "presets": [
+    {
+      "id": "example-balanced",
+      "schema_version": 1,
+      "name": "Example balanced",
+      "model_id": "replace-with-library-model-id",
+      "model_path": "replace-with-absolute-path-to-model.gguf",
+      "parameters": {
+        "ctx_size": 4096,
+        "temp": 0,
+        "top_p": 0.95
+      },
+      "template": {
+        "mode": "embedded"
+      },
+      "source": "example",
+      "created_at": "2026-09-24T00:00:00Z",
+      "updated_at": "2026-09-24T00:00:00Z"
+    }
+  ]
+}

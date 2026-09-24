@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>从零配置 DSH 伴航</title>
+<style>body{font-family:"Microsoft YaHei",sans-serif;color:#e5e7eb;background:#111827;line-height:1.65;margin:18px;max-width:940px}h1,h2{color:#f9fafb}a{color:#93c5fd}code{color:#fde68a}table{border-collapse:collapse;width:100%}td,th{border:1px solid #475569;padding:5px;text-align:left}small{color:#cbd5e1}</style></head><body>
+<h1>从零配置本地 Qwen 与 DSH</h1>
+<p>适用于只有 DSH 伴航、没有模型、引擎或 DSH 的 Windows 电脑。伴航不附带权重、llama.cpp、Node.js 和 DSH，也不暗中安装。已有可用组件可以复制到独立目录，然后重新绑定。原部署时的旧 Qwen3.5 清理无需重复。详细出处与操作边界见同目录《从零配置指南.md》。</p>
+<h2>快速起步</h2>
+<ol><li>在「设置与诊断 → 运行环境」查看硬件。到 <a href="https://github.com/ggml-org/llama.cpp/releases">llama.cpp 官方发布页</a>选 Windows x64 构建；不确定 GPU 兼容性时先用 CPU。完整解压主 ZIP 及发行页要求的配套运行库，选择 <code>llama-server.exe</code> 并点「检测并使用」。不要只复制 EXE。</li>
+<li>在「模型库与下载」从下表的 Hugging Face 仓库选择明确的 GGUF 量化文件。单文件最容易起步；分片文件必须下载同组全部分片。保留足够磁盘、RAM 与显存余量，下载完成后入库核对元数据。</li>
+<li>先用 GGUF 的内嵌聊天模板。在「工作台」选模型、「参数预设」看能力与可选值，从小上下文和保守 GPU 层数启动。等待真实 API 就绪，再在「试聊」问一句话。文本成功后继续测试结构化工具调用。</li>
+<li>需要 DSH 时，从 <a href="https://nodejs.org/en/download">Node.js 官方页面</a>与 <a href="https://github.com/deepseek-ai/deepseek-harness#run">DSH 官方说明</a>取得当前可安装版本。在「设置与诊断 → DSH 组件」绑定安装目录和 <code>node.exe</code>。到「DSH 与提供方」启动/连接已认证 DSH，将本地模型与预设接入，连接测试，设为新会话默认，再「开始 DSH 工作」。</li></ol>
+<h2>硬件与引擎</h2>
+<p>CPU 可先验证功能，但 27B 模型可能很慢。NVIDIA 可选与驱动匹配的 CUDA 版，按发行页解压所需 DLL；预编译版通常不要求完整 CUDA Toolkit。AMD、Intel GPU 要依据实际设备、驱动及发布页选择 Vulkan、ROCm 或其他可用构建，不能假定 AMD 一律支持 ROCm。伴航只检测用户选择的引擎，不内置 GPU 后端。原机器的历史复现引擎是 <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11149">llama.cpp b11149</a> CUDA 12.4 x64；别把它当所有电脑的推荐版。</p>
+<h2>模型来源与大小</h2>
+<table><tr><th>用途</th><th>仓库</th><th>现有文件示例</th><th>大小</th></tr>
+<tr><td>原版 GSQ-RCO</td><td><a href="https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main">ISTA-DASLab</a></td><td><code>Qwen3.8-27B-GSQ-RCO-IQ3_S.gguf</code></td><td>11.77 GB</td></tr>
+<tr><td>Huihui 综合</td><td><a href="https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main">huihui-ai</a></td><td><code>Huihui-Qwen3.8-27B-abliterated-GSQ-RCO-IQ3_S.gguf</code></td><td>11.77 GB</td></tr>
+<tr><td>Huihui 写作</td><td><a href="https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main">huihui-ai</a></td><td><code>Huihui-Qwen3.8-27B-abliterated-UD-IQ4_XS.gguf</code></td><td>14.40 GB</td></tr></table>
+<p>这些是已量化的 GGUF，无需另外下载全精度模型。下载时要认准文件名、量化、大小；几 KB 的 Git LFS 指针不是模型。视觉还需要匹配的 mmproj，纯文本不需要。现有文件 GGUF 头部显示架构 <code>qwen35</code>、量化 IQ3_S/IQ4_XS、标称上下文 262144 和内嵌模板；标称上限不等于本机可运行的上下文。</p>
+<h2>模板、参数与验证</h2>
+<p>要复现旧 Qwen 模板行为，可从 <a href="https://huggingface.co/froggeric/Qwen-Fixed-Chat-Templates/tree/855bffc">froggeric 固定提交 855bffc（v22.5）</a>取 <code>chat_template.jinja</code>，在预设中选择文件模板并绑定；换模板版本需重测。Jinja、reasoning format 等选项以当前引擎能力读取为准。</p>
+<p>旧目标硬件为 i7-13700K、RTX 4080 16 GB、64 GB RAM。确认当前电脑与可用显存/内存后再参照旧档：IQ3_S 32K/60 GPU 层、IQ3_S 64K/48 层、IQ4_XS 8K/52 层；共同设置为 batch/ubatch 256、K/V q8_0、Flash Attention、并发 1。思考档为 medium、预算 4096、温度 1.0、top-p 0.95、top-k 20、min-p 0、presence penalty 0；直接回答档为思考 off、预算 0、温度 0.7。MTP 保持关闭。它们只是旧机参考。其他电脑先试 4096 或 8192 上下文、并发 1、低 GPU 层数。启动状态必须到 API 就绪。试聊页「单次生成上限（max_tokens）」可设 8192；这是单次请求，不是模型原生能力，也不等于 DSH 的请求上限。</p>
+<p>试聊一句简单问题后，向模型声明虚构 <code>get_weather</code> 工具、要求给“北京”参数，检查结构化 <code>tool_calls</code> 与 JSON 参数；再回传固定虚构工具结果，确认模型继续回答，无需执行实际工具。</p>
+<h2>原始部署的十项完成条件</h2>
+<ol><li>Huihui IQ3_S 真实中文问答。</li><li>切换 Original IQ3_S 后真实中文问答。</li><li>完成并检查代码任务。</li><li>输出可解析 Tool Call。</li><li>Tool Result 回传后继续回答。</li><li>停止服务再启动且 API 再就绪。</li><li>32K 档完成长文档测试并记录 RAM/VRAM 与用时。</li><li>内嵌模板与 froggeric 做 A/B，确认思考能退出、正文分离、工具 JSON 完整。</li><li>确认并记录 MTP OFF 基线。</li><li>仅授权隔离 sandbox，让 DSH/Agent 完成创建、读取/修改、无害检查小文件的真实多步任务，并核对结果。</li></ol>
+<p>以上十项要按本机真实结果逐项记录；旧报告不能替代新测试。64K、128K/262K、MTP A/B、视觉与 compaction 是稳定基线后的条件式实验，详见同目录《进阶实验路线.md》。</p>
+<h2>DSH、本机 API 与新会话</h2>
+<p>DSH 属开发预览版，版本与依赖可能变化；以官方当前说明和完整安装、启动、认证结果为准。伴航现有独立安装清单钉住 <code>@deepseek-ai/dsh 0.1.5-rc.3</code>，但不能仅凭版本号宣称适用于全新安装。检测安装目录和 Node 后，启动程序管理的 DSH，或粘贴外部 DSH 的原认证链接连接。提供方 Base URL 使用伴航显示的本机地址，通常为 <code>http://127.0.0.1:&lt;端口&gt;/v1</code>；模型名使用 API alias，密钥在安全输入框填，模型上下文长度依据 GGUF 元数据及实际设置。先连接测试，再设为新会话默认，最后新建 DSH 会话验证生成。外部 DSH 的代理和生命周期由外部管理。DSH「请求输出上限」留空时采用 <code>min(4096, 上下文/4)</code> 且受运行上限约束；要尝试原配方的 8192，须显式填 8192 并通过端点校验。它与试聊页上限彼此独立，参数预设不保存该字段。</p>
+<h2>进阶实验的顺序</h2>
+<p>先完成十项基线，再依次试 64K、独立构建的 Adaptive KV Streaming 128K → 200K → 262K；实验分支须与主线引擎及 DLL 分目录。当前分支使用 <code>--kv-stream-arena-mib</code>，arena 同时承担 KV 和阶段计算空间，2304 MiB 不是通用最佳值；<code>--cache-ram</code> 是主机 RAM prompt/prefix cache 上限，不是 Streaming 的 host KV。每级观察 OOM、峰值 RAM/VRAM、prefill/decode、文档检索与工具闭环。MTP 只做独立 OFF/ON A/B，先查当前引擎是否支持 draft-mtp 与 draft-n-max 2，不默认打开。视觉需匹配 mmproj，文本稳定后测 720P/1080P。compaction 插件最后在独立 DSH profile 中实验。当前普通参数预设没有 arena、cache-ram 或 MTP 字段，不要把没传给实验引擎的参数说成已生效。</p>
+<h2>局域网、退出、代理与故障</h2>
+<p>局域网默认关闭。需要跨设备调用时，在伴航开启「允许局域网访问 API」、设置有效密钥、选择正确网卡地址，只开放必要的模型端口。第二台设备用显示的 <code>http://&lt;局域网IP&gt;:&lt;端口&gt;/v1</code> 测试：正确密钥成功，错误或无密钥拒绝，管理界面不能从局域网访问。<code>0.0.0.0</code> 不是客户端地址；本机访问自身局域网 IP 也不算跨设备验证。</p>
+<p>最小化到托盘会保留模型；当前版本用 X 退出会停止本程序管理的模型。开机启动管理器、启动后加载模型、启动收托盘分别默认关闭。端口占用先查进程归属，模型加载失败先看日志并减小上下文/GPU 层数，工具结构异常先切回内嵌模板对照，DSH 插件错误保留第一处原始错误及版本。网络代理可影响 Hugging Face 下载；伴航管理的 DSH 只支持 HTTP/HTTPS 代理，改动后要重启它，不支持 SOCKS5；本机 API、<code>localhost</code>、<code>127.0.0.1</code> 与本机局域网地址应绕过代理。</p>
+<small>模型与引擎来自各自官方/发布者页面；旧环境性能只对旧硬件与组件组合有效。本指南不分发第三方程序或模型。2026-09-24。</small>
+</body></html>

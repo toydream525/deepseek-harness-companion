@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "dsh-companion-presets",
+  "presets": [
+    {
+      "id": "example-huihui-iq3-stable32k", "schema_version": 1,
+      "name": "原机参考：Huihui IQ3_S 32K 思考（先绑定/验证）",
+      "model_id": "replace-with-huihui-library-id", "model_path": "replace-with-huihui-iq3-s.gguf",
+      "parameters": {"ctx_size":32768,"ngl":60,"batch_size":256,"ubatch_size":256,"parallel":1,"cache_type_k":"q8_0","cache_type_v":"q8_0","flash_attn":true,"jinja":true,"reasoning_format":"deepseek","reasoning_effort":"medium","reasoning_budget":4096,"temp":1.0,"top_p":0.95,"top_k":20,"min_p":0.0,"presence_penalty":0.0},
+      "template": {"mode":"file","path":"replace-with-chat_template.jinja"},
+      "source":"historical_reference_requires_rebind_and_test",
+      "created_at":"2026-09-24T00:00:00Z","updated_at":"2026-09-24T00:00:00Z"
+    },
+    {
+      "id": "example-original-iq3-stable32k", "schema_version": 1,
+      "name": "原机参考：Original IQ3_S 32K 思考（先绑定/验证）",
+      "model_id": "replace-with-original-library-id", "model_path": "replace-with-original-iq3-s.gguf",
+      "parameters": {"ctx_size":32768,"ngl":60,"batch_size":256,"ubatch_size":256,"parallel":1,"cache_type_k":"q8_0","cache_type_v":"q8_0","flash_attn":true,"jinja":true,"reasoning_format":"deepseek","reasoning_effort":"medium","reasoning_budget":4096,"temp":1.0,"top_p":0.95,"top_k":20,"min_p":0.0,"presence_penalty":0.0},
+      "template": {"mode":"file","path":"replace-with-chat_template.jinja"},
+      "source":"historical_reference_requires_rebind_and_test",
+      "created_at":"2026-09-24T00:00:00Z","updated_at":"2026-09-24T00:00:00Z"
+    },
+    {
+      "id": "example-huihui-iq3-direct32k", "schema_version": 1,
+      "name": "原机参考：Huihui IQ3_S 32K 直接回答（先绑定/验证）",
+      "model_id": "replace-with-huihui-library-id", "model_path": "replace-with-huihui-iq3-s.gguf",
+      "parameters": {"ctx_size":32768,"ngl":60,"batch_size":256,"ubatch_size":256,"parallel":1,"cache_type_k":"q8_0","cache_type_v":"q8_0","flash_attn":true,"jinja":true,"reasoning_format":"deepseek","reasoning_effort":"off","reasoning_budget":0,"temp":0.7,"top_p":0.95,"top_k":20,"min_p":0.0,"presence_penalty":0.0},
+      "template": {"mode":"file","path":"replace-with-chat_template.jinja"},
+      "source":"historical_reference_requires_rebind_and_test",
+      "created_at":"2026-09-24T00:00:00Z","updated_at":"2026-09-24T00:00:00Z"
+    },
+    {
+      "id": "example-huihui-iq4-writing8k", "schema_version": 1,
+      "name": "原机参考：Huihui IQ4_XS 写作 8K（先绑定/验证）",
+      "model_id": "replace-with-writing-library-id", "model_path": "replace-with-huihui-iq4-xs.gguf",
+      "parameters": {"ctx_size":8192,"ngl":52,"batch_size":256,"ubatch_size":256,"parallel":1,"cache_type_k":"q8_0","cache_type_v":"q8_0","flash_attn":true,"jinja":true,"reasoning_format":"deepseek","reasoning_effort":"medium","reasoning_budget":4096,"temp":1.0,"top_p":0.95,"top_k":20,"min_p":0.0,"presence_penalty":0.0},
+      "template": {"mode":"file","path":"replace-with-chat_template.jinja"},
+      "source":"historical_reference_requires_rebind_and_test",
+      "created_at":"2026-09-24T00:00:00Z","updated_at":"2026-09-24T00:00:00Z"
+    },
+    {
+      "id": "example-huihui-iq3-extended64k", "schema_version": 1,
+      "name": "进阶参考：Huihui IQ3_S 64K（32K 通过后再试）",
+      "model_id": "replace-with-huihui-library-id", "model_path": "replace-with-huihui-iq3-s.gguf",
+      "parameters": {"ctx_size":65536,"ngl":48,"batch_size":256,"ubatch_size":256,"parallel":1,"cache_type_k":"q8_0","cache_type_v":"q8_0","flash_attn":true,"jinja":true,"reasoning_format":"deepseek","reasoning_effort":"medium","reasoning_budget":4096,"temp":1.0,"top_p":0.95,"top_k":20,"min_p":0.0,"presence_penalty":0.0},
+      "template": {"mode":"file","path":"replace-with-chat_template.jinja"},
+      "source":"historical_reference_requires_rebind_and_test",
+      "created_at":"2026-09-24T00:00:00Z","updated_at":"2026-09-24T00:00:00Z"
+    }
+  ]
+}

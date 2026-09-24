@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "kind": "dsh-companion-recipe",
+  "recipe_id": "qwen38-original-prompt",
+  "recipe_version": "1.0.1",
+  "source_reference": "public-recipe:qwen38-original-prompt@1.0.1",
+  "description": "原始 Qwen3.8-27B 提示词的可移植配置。仅导入预设；不含模型、引擎、模板、密钥，也不启动或下载。32K/写作档是原机参数起点，需在目标机重新验收。",
+  "runtime_expectations": {
+    "engine": "llama.cpp Windows CUDA; confirm actual --help before use",
+    "mtp": "off by runtime default; preset schema cannot force MTP",
+    "host": "127.0.0.1",
+    "context_baseline": 32768,
+    "parallel": 1
+  },
+  "presets": [
+    {
+      "id": "recipe-qwen38-uncensored-32k-v1",
+      "name": "Qwen3.8 Uncensored IQ3_S 32K 思考",
+      "role": "uncensored_iq3",
+      "phase": "baseline",
+      "verified_on_source_host": true,
+      "model_resource": {
+        "filename": "Huihui-Qwen3.8-27B-abliterated-GSQ-RCO-IQ3_S.gguf",
+        "size_bytes": 11771546208,
+        "architecture": "qwen35",
+        "quantization": "IQ3_S"
+      },
+      "template": {
+        "mode": "file",
+        "filename": "chat_template.jinja",
+        "sha256": "E57684BAE4156211A55473C5A63BE976A405A37AB5BE5AE0E5ABF1DF5349C4B2",
+        "source": "froggeric/Qwen-Fixed-Chat-Templates v22.5 @ 855bffc"
+      },
+      "parameters": {
+        "ctx_size": 32768, "ngl": 60, "batch_size": 256, "ubatch_size": 256,
+        "parallel": 1, "cache_type_k": "q8_0", "cache_type_v": "q8_0",
+        "flash_attn": true, "jinja": true, "reasoning_format": "deepseek",
+        "reasoning_effort": "medium", "reasoning_budget": 4096,
+        "temp": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0,
+        "presence_penalty": 0.0
+      }
+    },
+    {
+      "id": "recipe-qwen38-original-32k-v1",
+      "name": "Qwen3.8 Original IQ3_S 32K 思考",
+      "role": "original_iq3",
+      "phase": "baseline",
+      "verified_on_source_host": true,
+      "model_resource": {
+        "filename": "Qwen3.8-27B-GSQ-RCO-IQ3_S.gguf",
+        "size_bytes": 11771546784,
+        "architecture": "qwen35",
+        "quantization": "IQ3_S"
+      },
+      "template": {
+        "mode": "file",
+        "filename": "chat_template.jinja",
+        "sha256": "E57684BAE4156211A55473C5A63BE976A405A37AB5BE5AE0E5ABF1DF5349C4B2",
+        "source": "froggeric/Qwen-Fixed-Chat-Templates v22.5 @ 855bffc"
+      },
+      "parameters": {
+        "ctx_size": 32768, "ngl": 60, "batch_size": 256, "ubatch_size": 256,
+        "parallel": 1, "cache_type_k": "q8_0", "cache_type_v": "q8_0",
+        "flash_attn": true, "jinja": true, "reasoning_format": "deepseek",
+        "reasoning_effort": "medium", "reasoning_budget": 4096,
+        "temp": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0,
+        "presence_penalty": 0.0
+      }
+    },
+    {
+      "id": "recipe-qwen38-uncensored-direct-32k-v1",
+      "name": "Qwen3.8 Uncensored IQ3_S 32K Direct",
+      "role": "uncensored_iq3",
+      "phase": "baseline",
+      "verified_on_source_host": true,
+      "model_resource": {
+        "filename": "Huihui-Qwen3.8-27B-abliterated-GSQ-RCO-IQ3_S.gguf",
+        "size_bytes": 11771546208,
+        "architecture": "qwen35",
+        "quantization": "IQ3_S"
+      },
+      "template": {
+        "mode": "file",
+        "filename": "chat_template.jinja",
+        "sha256": "E57684BAE4156211A55473C5A63BE976A405A37AB5BE5AE0E5ABF1DF5349C4B2",
+        "source": "froggeric/Qwen-Fixed-Chat-Templates v22.5 @ 855bffc"
+      },
+      "parameters": {
+        "ctx_size": 32768, "ngl": 60, "batch_size": 256, "ubatch_size": 256,
+        "parallel": 1, "cache_type_k": "q8_0", "cache_type_v": "q8_0",
+        "flash_attn": true, "jinja": true, "reasoning_format": "deepseek",
+        "reasoning_effort": "off", "reasoning_budget": 0,
+        "temp": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0,
+        "presence_penalty": 0.0
+      }
+    },
+    {
+      "id": "recipe-qwen38-writing-iq4-8k-v1",
+      "name": "Qwen3.8 Uncensored UD-IQ4_XS 写作 8K（待本机验收）",
+      "role": "writing_iq4",
+      "phase": "baseline",
+      "verified_on_source_host": false,
+      "model_resource": {
+        "filename": "Huihui-Qwen3.8-27B-abliterated-UD-IQ4_XS.gguf",
+        "size_bytes": 14403496864,
+        "architecture": "qwen35",
+        "quantization": "IQ4_XS"
+      },
+      "template": {
+        "mode": "file",
+        "filename": "chat_template.jinja",
+        "sha256": "E57684BAE4156211A55473C5A63BE976A405A37AB5BE5AE0E5ABF1DF5349C4B2",
+        "source": "froggeric/Qwen-Fixed-Chat-Templates v22.5 @ 855bffc"
+      },
+      "parameters": {
+        "ctx_size": 8192, "ngl": 52, "batch_size": 256, "ubatch_size": 256,
+        "parallel": 1, "cache_type_k": "q8_0", "cache_type_v": "q8_0",
+        "flash_attn": true, "jinja": true, "reasoning_format": "deepseek",
+        "reasoning_effort": "medium", "reasoning_budget": 4096,
+        "temp": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0,
+        "presence_penalty": 0.0
+      }
+    },
+    {
+      "id": "recipe-qwen38-uncensored-64k-experiment-v1",
+      "name": "实验：Qwen3.8 Uncensored IQ3_S 64K",
+      "role": "uncensored_iq3",
+      "phase": "advanced_unverified",
+      "verified_on_source_host": false,
+      "model_resource": {
+        "filename": "Huihui-Qwen3.8-27B-abliterated-GSQ-RCO-IQ3_S.gguf",
+        "size_bytes": 11771546208,
+        "architecture": "qwen35",
+        "quantization": "IQ3_S"
+      },
+      "template": {
+        "mode": "file",
+        "filename": "chat_template.jinja",
+        "sha256": "E57684BAE4156211A55473C5A63BE976A405A37AB5BE5AE0E5ABF1DF5349C4B2",
+        "source": "froggeric/Qwen-Fixed-Chat-Templates v22.5 @ 855bffc"
+      },
+      "parameters": {
+        "ctx_size": 65536, "ngl": 48, "batch_size": 256, "ubatch_size": 256,
+        "parallel": 1, "cache_type_k": "q8_0", "cache_type_v": "q8_0",
+        "flash_attn": true, "jinja": true, "reasoning_format": "deepseek",
+        "reasoning_effort": "medium", "reasoning_budget": 4096,
+        "temp": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0,
+        "presence_penalty": 0.0
+      }
+    }
+  ],
+  "unverified_experiments": [
+    "128K/200K/262144 Adaptive KV Streaming and arena sizing",
+    "MTP ON A/B and acceptance rate",
+    "720P/1080P vision with matching mmproj",
+    "DSH compaction/VCC after Agent stability"
+  ]
+}

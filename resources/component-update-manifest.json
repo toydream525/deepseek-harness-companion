@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-09-24",
+  "engine": {
+    "version": "b11149",
+    "release_url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11149",
+    "channels": {
+      "cpu": [
+        {"name": "llama-b11149-bin-win-cpu-x64.zip", "size_bytes": 18559583, "sha256": "d1cb5f9ef7bbb7068954b4c9767d5b5309e20bcefeb61d4aafc47f9581f38752"}
+      ],
+      "cuda": [
+        {"name": "llama-b11149-bin-win-cuda-12.4-x64.zip", "size_bytes": 253869752, "sha256": "d3140fe21ab2e665a706ca27923b27ca264f1c564b5837abea4566cc49c16096"},
+        {"name": "cudart-llama-bin-win-cuda-12.4-x64.zip", "size_bytes": 391443627, "sha256": "8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6"}
+      ],
+      "vulkan": [
+        {"name": "llama-b11149-bin-win-vulkan-x64.zip", "size_bytes": 32126960, "sha256": "ca432b775c5dcb5af85bbdcf22b06b6e2dca792f30334b19ef4a45ee4a512446"}
+      ],
+      "rocm": [
+        {"name": "llama-b11149-bin-win-rocm-10.0-x64.zip", "size_bytes": 251910635, "sha256": "46a4eb51eb6ba6b677f67f1a4b37a82034560f484767915e6afaec43048c0ff0"}
+      ]
+    }
+  },
+  "dsh": {
+    "version": "0.1.5-rc.3",
+    "project_url": "https://github.com/deepseek-ai/deepseek-harness",
+    "registry_url": "https://registry.npmjs.org/",
+    "lock_sha256": "e9d0e3d2bf1798b168a5def012fb15fde8eabbf163c9e964ebbe3a7f87c80cda"
+  },
+  "node_url": "https://nodejs.org/en/download",
+  "driver_urls": {
+    "nvidia": "https://www.nvidia.com/en-us/drivers/",
+    "amd": "https://www.amd.com/en/support/download/drivers.html",
+    "intel": "https://www.intel.com/content/www/us/en/download-center/home.html"
+  }
+}
