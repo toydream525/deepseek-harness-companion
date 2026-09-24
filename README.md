@@ -9,14 +9,14 @@
 
   `v0.1.0` · `Windows x64` · [`MIT`](LICENSE)
 
-  **[下载安装版](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-Setup-v0.1.0-windows-x64.exe)** · [下载便携 ZIP](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-v0.1.0-windows-x64.zip) · **[详细配置说明](docs/GETTING_STARTED.zh-CN.md)** · [项目主页](https://yuriaqua.com/harness)
+  **安装包准备发布** · [查看发布页](https://github.com/toydream525/deepseek-harness-companion/releases) · **[详细配置说明](docs/GETTING_STARTED.zh-CN.md)** · [项目主页](https://yuriaqua.com/harness)
+
+  <small>模型与运行环境准备见<a href="docs/GETTING_STARTED.zh-CN.md">详细配置说明</a>。</small>
 </div>
 
 ![DSH 伴航真实界面](docs/images/app-preview.png)
 
-在一个桌面窗口里选择 GGUF 模型、启动本地 API、试聊，并将模型接入 DSH。首页只保留当前状态和常用操作；详细选项在工作台与设置中。
-
-> **安装包不含模型权重、llama.cpp、Node.js 或 DSH。** 你自行下载并在软件里选择路径；已有文件可以直接复用。下方 Qwen 参数来自一台 Windows 11 / RTX 4080 16 GB / 64 GB RAM 电脑，其他硬件请从保守设置开始。
+在一个桌面窗口里选择 GGUF 模型、启动本地 API、试聊，并将模型接入 DSH。
 
 ## 能做什么
 
@@ -52,7 +52,7 @@
 
 ## 可选：一键导入 Qwen 16GB 显存推荐参考方案
 
-软件内可选择「一键导入原提示词配置」，也可用发布包的 `scripts/deploy/` 模式入口。**这套脚本以 NVIDIA 16GB 显存和 64GB 系统内存为目标**；并非所有 16GB 显存设备都适配，其他硬件要按实际情况调整。**只需下载你选择的档位所需 GGUF**；模型权重不会自动下载。固定模板、硬件条件与参数见[详细说明](docs/GETTING_STARTED.zh-CN.md#qwen-参考方案)。
+软件内可选择「一键导入原提示词配置」，也可用发布包的 `scripts/deploy/` 模式入口。只需自行下载所选档位的 GGUF；固定模板与参数见[详细说明](docs/GETTING_STARTED.zh-CN.md#qwen-参考方案)。
 
 1. 按下表选档位，从对应 Hugging Face 页面**手动下载完整 GGUF**，准备兼容的 llama.cpp 引擎与指南所列模板；已有文件直接复用。
 2. 在「模型库与下载」添加文件，然后到「工作台」点「一键导入原提示词配置」，在预览中绑定这台电脑的模型和模板路径；缺少资源会提示，可稍后补齐。
@@ -64,6 +64,8 @@
 | [Direct 32K](scripts/deploy/UncensoredDirect32K.cmd) | 日常问答、改写、快速交互 | 回答更直接；复杂推理结果需要复核 | [同上 IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
 | [原版 32K](scripts/deploy/Original32K.cmd) | 保留原版行为、做对照任务 | 便于比较输出；仍需较多资源，行为可能更保守（推断） | [ISTA IQ3_S](https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main) |
 | [写作 8K](scripts/deploy/Writing8K-unverified.cmd) | 长文创作、改写 | 较高量化精度一般预期损失较少，未据此断言质量提升；文件更大、上下文较短 | [Huihui UD-IQ4_XS](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+
+<small>参考环境：NVIDIA 16GB 显存、64GB 系统内存；其他硬件请按<a href="docs/GETTING_STARTED.zh-CN.md#qwen-参考方案">详细指南</a>调整。</small>
 
 ## 文档
 

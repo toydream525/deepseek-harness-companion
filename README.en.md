@@ -9,14 +9,14 @@
 
   `v0.1.0` · `Windows x64` · [`MIT`](LICENSE)
 
-  **[Download installer](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-Setup-v0.1.0-windows-x64.exe)** · [Portable ZIP](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-v0.1.0-windows-x64.zip) · **[Detailed setup](docs/GETTING_STARTED.en.md)** · [Project site](https://yuriaqua.com/harness)
+  **Installer preparing for release** · [Release page](https://github.com/toydream525/deepseek-harness-companion/releases) · **[Detailed setup](docs/GETTING_STARTED.en.md)** · [Project site](https://yuriaqua.com/harness)
+
+  <small>For models and runtime requirements, see the <a href="docs/GETTING_STARTED.en.md">detailed setup guide</a>.</small>
 </div>
 
 ![DSH Companion desktop](docs/images/app-preview.png)
 
-Choose a GGUF model, start a local API, try a chat, and connect that model to DSH from one desktop app. The home page shows status and common actions; detailed controls live in Workbench and Settings.
-
-> **The installer does not include model weights, llama.cpp, Node.js, or DSH.** Download these separately and select their paths in the app; existing files can be reused. The optional Qwen presets came from a Windows 11 machine with RTX 4080 16 GB and 64 GB RAM. Start with conservative settings on other hardware.
+Choose a GGUF model, start a local API, try a chat, and connect that model to DSH from one desktop app.
 
 ## What it does
 
@@ -52,7 +52,7 @@ For a staged checklist and troubleshooting, see the [expanded AI setup task](doc
 
 ## Optional Qwen 16GB VRAM recommended reference presets
 
-Use **Import original prompt setup** inside the app, or choose a launcher in `scripts/deploy/`. **These scripts target NVIDIA 16GB VRAM and 64GB system RAM**, not every 16GB VRAM device; adapt settings to other hardware. **Download only the GGUF needed for your chosen mode**; model weights are never downloaded automatically. The pinned template, hardware conditions, and settings are in the [detailed guide](docs/GETTING_STARTED.en.md#qwen-reference-setup).
+Use **Import original prompt setup** inside the app, or choose a launcher in `scripts/deploy/`. Download only the GGUF for your chosen mode; the pinned template and settings are in the [detailed guide](docs/GETTING_STARTED.en.md#qwen-reference-setup).
 
 1. Choose a mode below, **manually download its complete GGUF** from Hugging Face, and prepare a compatible llama.cpp engine and the template named in the guide. Reuse existing files when available.
 2. Add the model under **Model Library & Downloads**, then use **Import original prompt setup** in Workbench. Bind this computer's model and template paths in the preview; missing resources are shown and can be supplied later.
@@ -64,6 +64,8 @@ Use **Import original prompt setup** inside the app, or choose a launcher in `sc
 | [Direct 32K](scripts/deploy/UncensoredDirect32K.cmd) | Everyday questions, rewriting, quick interaction | More direct answers; review complex reasoning results | [Same IQ3_S](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
 | [Original 32K](scripts/deploy/Original32K.cmd) | Original model behavior, comparison tasks | Useful as a comparison; still resource-heavy and may be more conservative (inference) | [ISTA IQ3_S](https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/tree/main) |
 | [Writing 8K](scripts/deploy/Writing8K-unverified.cmd) | Long-form drafting and rewriting | Higher quantization precision is generally expected to reduce loss, not proven quality here; larger file and shorter context | [Huihui UD-IQ4_XS](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/tree/main) |
+
+<small>Reference hardware: NVIDIA 16GB VRAM and 64GB system RAM. Adjust for other hardware with the <a href="docs/GETTING_STARTED.en.md#qwen-reference-setup">detailed guide</a>.</small>
 
 ## Documentation
 
