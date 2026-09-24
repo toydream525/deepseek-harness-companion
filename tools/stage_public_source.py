@@ -48,6 +48,8 @@ STATIC_FILES = {
     ".gitignore", "AGENTS.md", "LICENSE", "README.md", "README.en.md",
     "THIRD-PARTY-NOTICES.md", "requirements-build.txt",
     "requirements-vendor.txt", "docs/OPEN_SOURCE_RELEASE.md",
+    "docs/GETTING_STARTED.zh-CN.md", "docs/GETTING_STARTED.en.md",
+    "docs/AI_SETUP.zh-CN.md", "docs/AI_SETUP.en.md",
     "docs/images/app-preview.png", "tools/stage_public_source.py",
     "tools/build_installer.ps1", "installer/DSH-Companion.iss",
     "manager/DSH-Companion.spec", "manager/version_info.txt",
@@ -66,7 +68,7 @@ TEXT_SUFFIXES = {".py", ".spec", ".json", ".md", ".html", ".svg", ".txt",
                  ".ps1", ".cmd", ".iss"}
 SECRET_MARKERS = {
     "private-key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
-    "api-token": re.compile(r"(?:sk-[A-Za-z0-9_-]{20,}|hf_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})"),
+    "api-token": re.compile(r"(?<![A-Za-z0-9_-])(?:sk-[A-Za-z0-9_-]{20,}|hf_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})"),
     "local-user-path": re.compile(r"[A-Za-z]:[/\\](?:Users|用户)[/\\]", re.I),
     "development-drive": re.compile(r"[A-Za-z]:[/\\]AI[/\\]", re.I),
     "original-attachment-fingerprint": re.compile("source_prompt_" + "sha256"),
