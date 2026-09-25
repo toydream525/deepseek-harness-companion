@@ -11,6 +11,7 @@ AppPublisherURL=https://github.com/toydream525/deepseek-harness-companion
 AppSupportURL=https://github.com/toydream525/deepseek-harness-companion/issues
 AppUpdatesURL=https://github.com/toydream525/deepseek-harness-companion/releases
 DefaultDirName={localappdata}\Programs\DSH-Companion
+UsePreviousAppDir=yes
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest

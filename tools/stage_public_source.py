@@ -45,7 +45,7 @@ LICENSE_TEXTS = {
     "Python-3.12.txt", "Inno-Setup-LICENSE.txt",
 }
 STATIC_FILES = {
-    ".gitignore", "AGENTS.md", "LICENSE", "README.md", "README.en.md",
+    ".gitignore", "LICENSE", "README.md", "README.en.md",
     "THIRD-PARTY-NOTICES.md", "requirements-build.txt",
     "requirements-vendor.txt", "docs/OPEN_SOURCE_RELEASE.md",
     "docs/GETTING_STARTED.zh-CN.md", "docs/GETTING_STARTED.en.md",

@@ -37,7 +37,7 @@ powershell.exe -NoProfile -File .\scripts\deploy\Deploy.ps1 -Mode Uncensored32K 
 
 The launcher calls the packaged EXE, so it needs no separate Python. It rejects machines whose original hardware conditions cannot be confirmed; use the app's general preset flow on other systems. If PowerShell policy blocks the script, inspect its source first. You may use `Set-ExecutionPolicy -Scope Process RemoteSigned` in the **current window only**, or use the in-app import instead of changing global policy.
 
-> In this review, the current external llama-server build11149 using Huihui IQ3_S with froggeric v22.5 at 32K generated 128 `/` characters for "hello". Toggling thinking did not change the result. The cause remains unknown; the external process was not modified or stopped. This observation applies only to that instance.
+> An earlier running instance with this configuration generated 128 `/` characters for a Chinese request. A clean instance later answered normally with a UTF-8 request, including two seeds and thinking disabled. The earlier process was already gone, so its cause is unconfirmed. If this recurs, preserve the same instance's logs and request bytes for diagnosis. This does not establish behavior for other models or configurations.
 
 ## 3. Connect DeepSeek Harness
 

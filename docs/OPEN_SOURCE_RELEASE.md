@@ -1,4 +1,4 @@
-# Open-source build and release guide
+﻿# Open-source build and release guide
 
 This document describes the public source of DSH 伴航 / Harness Companion. The
 application is an independent community project and is not affiliated with or
@@ -18,8 +18,8 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe manager\build_exe.py
 ```
 
-The v0.1.0 build writes `release/DSH-Companion/` and
-`release/DSH-Companion-v0.1.0-windows-x64.zip`. The ZIP includes the interpreter and
+The v0.2.0 build writes `release/DSH-Companion/` and
+`release/DSH-Companion-v0.2.0-windows-x64.zip`. The ZIP includes the interpreter and
 Qt libraries but not optional llama.cpp, Node.js, DeepSeek Harness, models, or
 GPU runtimes. The fixed component-update manifest and npm integrity lock are
 instructions for opt-in downloads, not installed third-party runtimes. Run the
@@ -36,7 +36,7 @@ and run the script after the clean onedir build:
 ```
 
 This compiles `installer/DSH-Companion.iss` into
-`release/DSH-Companion-Setup-v0.1.0-windows-x64.exe`. The installer contains
+`release/DSH-Companion-Setup-v0.2.0-windows-x64.exe`. The installer contains
 the onedir application, not a Python/Qt/DSH/Node/model downloader. It has no
 post-install launch or autorun action. Review its source and test an actual
 install and uninstall before release; a successful compiler exit alone does
@@ -55,10 +55,10 @@ The source archive is produced with `tools/stage_public_source.py`, which
 copies only explicit application files, documentation, icons, license texts,
 and example resources. It rejects personal state and likely secrets. It does
 not copy the development folder wholesale. Review the generated manifest and
-`deepseek-harness-companion-v0.1.0-source.zip` before uploading them to GitHub.
+`deepseek-harness-companion-v0.2.0-source.zip` before uploading them to GitHub.
 
 ```powershell
-.\.venv\Scripts\python.exe tools\stage_public_source.py ..\public-source-review-v0.1.0
+.\.venv\Scripts\python.exe tools\stage_public_source.py ..\public-source-review-v0.2.0
 ```
 
 Choose a destination that does not already exist. The script writes a source
@@ -94,3 +94,4 @@ Virtual Keyboard binaries; the final ZIP audit checks this. Qt PDF is also
 excluded because the application does not use it and that module brings
 additional PDFium notices. Do not remove applicable third-party license
 materials when repackaging.
+

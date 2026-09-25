@@ -1,9 +1,9 @@
-<div align="center">
+﻿<div align="center">
   <img src="manager/assets/companion-icon-128.png" alt="DSH Companion icon" width="88" />
 
   # DSH Companion
 
-  **Start local models with one click on Windows; DSH, Pi WebUI, and Harness Desktop are optional.**
+  **A local model and multi-frontend console for DeepSeek Harness and Pi WebUI.**
 
   [简体中文](README.md) · English
 
@@ -80,3 +80,4 @@ Use **Import original prompt setup** inside the app, or choose a launcher in `sc
 | Licenses and dependencies | [MIT](LICENSE) · [Third-party notices](THIRD-PARTY-NOTICES.md) |
 
 DSH Companion is an independent community project, not affiliated with or endorsed by DeepSeek. [DeepSeek Harness upstream](https://github.com/deepseek-ai/deepseek-harness).
+

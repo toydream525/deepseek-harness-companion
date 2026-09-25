@@ -1,9 +1,9 @@
-<div align="center">
+﻿<div align="center">
   <img src="manager/assets/companion-icon-128.png" alt="DSH 伴航图标" width="88" />
 
   # DSH 伴航
 
-  **一键启动本地模型；DSH、Pi WebUI 和 Harness Desktop 都可单独使用。**
+  **本地模型与多前端控制台，连接 DeepSeek Harness 与 Pi WebUI。**
 
   简体中文 · [English](README.en.md)
 
@@ -79,3 +79,4 @@
 | 许可与第三方组件 | [MIT](LICENSE) · [第三方声明](THIRD-PARTY-NOTICES.md) |
 
 DSH 伴航是独立社区项目，与 DeepSeek 没有隶属或背书关系。[DeepSeek Harness 官方项目](https://github.com/deepseek-ai/deepseek-harness)在此。
+

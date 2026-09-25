@@ -1137,14 +1137,13 @@ class MainWindow(QMainWindow):
         self._title(layout, "\u9996\u9875", "\u672c\u5730\u6a21\u578b\u53ef\u72ec\u7acb\u542f\u52a8\uff1bDeepSeek Harness \u53ef\u6309\u9700\u63a5\u5165\u3002")
         hero, hero_layout = card()
         hero.setObjectName("heroCard")
-        hero.setMinimumHeight(560)
-        hero_layout.setContentsMargins(34, 30, 34, 30)
-        hero_layout.setSpacing(26)
+        hero_layout.setContentsMargins(24, 20, 24, 20)
+        hero_layout.setSpacing(14)
         hero_top = QHBoxLayout()
         hero_top.setSpacing(28)
         compass = QLabel()
-        compass.setPixmap(app_icon().pixmap(110, 110))
-        compass.setFixedSize(124, 124)
+        compass.setPixmap(app_icon().pixmap(88, 88))
+        compass.setFixedSize(100, 100)
         compass.setAlignment(Qt.AlignmentFlag.AlignCenter)
         hero_top.addWidget(compass)
         status_column = QVBoxLayout()
@@ -1167,6 +1166,7 @@ class MainWindow(QMainWindow):
         summary_layout.setContentsMargins(20, 14, 20, 14)
         summary_layout.setSpacing(0)
         model_row = QHBoxLayout()
+        model_row.setSpacing(12)
         model_row.setContentsMargins(0, 6, 0, 13)
         model_title = QLabel("当前模型")
         model_title.setObjectName("homeRowLabel")
@@ -1184,6 +1184,7 @@ class MainWindow(QMainWindow):
         divider1.setObjectName("homeDivider")
         summary_layout.addWidget(divider1)
         running_row = QHBoxLayout()
+        running_row.setSpacing(12)
         running_row.setContentsMargins(0, 13, 0, 13)
         running_title = QLabel("运行状态")
         running_title.setObjectName("homeRowLabel")
@@ -1198,6 +1199,7 @@ class MainWindow(QMainWindow):
         divider2.setObjectName("homeDivider")
         summary_layout.addWidget(divider2)
         dsh_row = QHBoxLayout()
+        dsh_row.setSpacing(12)
         dsh_row.setContentsMargins(0, 13, 0, 6)
         dsh_title = QLabel("\u6a21\u578b\u524d\u7aef")
         dsh_title.setObjectName("homeRowLabel")
@@ -1208,7 +1210,7 @@ class MainWindow(QMainWindow):
         self.frontend_combo.addItem("Harness \u684c\u9762\u7aef", "dsh_desktop")
         self.frontend_combo.addItem("Pi WebUI", "pi")
         self.frontend_combo.currentIndexChanged.connect(self._update_frontend_link)
-        dsh_row.addWidget(self.frontend_combo)
+        dsh_row.addWidget(self.frontend_combo, 1)
         self.quick_dsh_state = QLabel("\u6b63\u5728\u68c0\u6d4b\u2026")
         self.quick_dsh_state.setObjectName("homeRowValue")
         dsh_row.addWidget(self.quick_dsh_state, 1)
@@ -1216,22 +1218,38 @@ class MainWindow(QMainWindow):
         self.frontend_link_edit = QLineEdit()
         self.frontend_link_edit.setReadOnly(True)
         self.frontend_link_edit.setPlaceholderText("\u6240\u9009\u524d\u7aef\u7684\u53ef\u7528\u94fe\u63a5")
-        summary_layout.addWidget(self.frontend_link_edit)
+        frontend_link_row = QHBoxLayout()
+        frontend_link_row.setSpacing(8)
+        frontend_link_row.addWidget(self.frontend_link_edit, 1)
+        self.frontend_copy_btn = button("\u590d\u5236\u94fe\u63a5", self.copy_selected_frontend_link)
+        self.frontend_copy_btn.setFixedHeight(34)
+        frontend_link_row.addWidget(self.frontend_copy_btn)
+        summary_layout.addLayout(frontend_link_row)
         hero_layout.addWidget(summary)
 
-        actions = QHBoxLayout()
-        actions.setSpacing(14)
+        actions = QVBoxLayout()
+        actions.setSpacing(8)
+        actions_top = QHBoxLayout()
+        actions_top.setSpacing(10)
+        actions_bottom = QHBoxLayout()
+        actions_bottom.setSpacing(10)
         self.start_btn = button("\u4e00\u952e\u542f\u52a8", self.start_model_and_frontend, "primaryButton")
         self.start_btn.setToolTip("\u542f\u52a8\u6216\u590d\u7528\u6240\u9009\u672c\u5730\u6a21\u578b\uff0c\u7b49\u5f85 API \u5c31\u7eea\u540e\u6253\u5f00\u6240\u9009\u524d\u7aef\u3002")
+        self.home_model_only_start_btn = button("\u4ec5\u542f\u52a8\u6a21\u578b", self.start_model)
         self.stop_btn = button("\u505c\u6b62\u672c\u5730\u6a21\u578b", self.stop_model)
         self.dsh_open_btn = button("\u6253\u5f00\u524d\u7aef", self.open_selected_frontend)
-        self.frontend_copy_btn = button("\u590d\u5236\u94fe\u63a5", self.copy_selected_frontend_link)
         self.frontend_force_btn = button("\u5f3a\u5236\u5173\u95ed\u6240\u9009\u524d\u7aef", self.force_close_selected_frontend, "dangerButton")
         self.chat_nav_btn = button("\u8bd5\u804a", lambda: self.nav.setCurrentRow(5))
-        for widget in (self.start_btn, self.stop_btn, self.dsh_open_btn, self.frontend_copy_btn, self.frontend_force_btn, self.chat_nav_btn):
+        for widget in (self.start_btn, self.home_model_only_start_btn, self.dsh_open_btn):
             widget.setProperty("homeAction", True)
-            widget.setMinimumHeight(56)
-            actions.addWidget(widget, 1)
+            widget.setMinimumHeight(46)
+            actions_top.addWidget(widget, 1)
+        for widget in (self.stop_btn, self.chat_nav_btn, self.frontend_force_btn):
+            widget.setProperty("homeAction", True)
+            widget.setMinimumHeight(46)
+            actions_bottom.addWidget(widget, 1)
+        actions.addLayout(actions_top)
+        actions.addLayout(actions_bottom)
         hero_layout.addLayout(actions)
         self.prep_hint = QLabel("正在检查所需组件…")
         self.prep_hint.setObjectName("homeHint")
@@ -1240,22 +1258,24 @@ class MainWindow(QMainWindow):
         self.complete_setup_btn = button("去工作台完成配置", self.toggle_advanced_controls)
         self.complete_setup_btn.setObjectName("homeSetupButton")
         hero_layout.addWidget(self.complete_setup_btn, 0, Qt.AlignmentFlag.AlignLeft)
-        self.note_label = QLabel("模型启动后可直接试聊。")
-        self.note_label.setObjectName("homeNote")
-        self.note_label.setWordWrap(True)
-        hero_layout.addWidget(self.note_label)
         layout.addWidget(hero)
         apps_card, apps_layout = card("\u53ef\u9009\u5e94\u7528")
-        apps_layout.addWidget(QLabel("Pi WebUI \u6765\u81ea xing-shuyin/pi-web-ui \u793e\u533a\u9879\u76ee\uff1b\u672c\u5730 API \u9700\u5728 WebUI \u4e2d\u624b\u52a8\u914d\u7f6e\u6216\u901a\u8fc7\u4e00\u952e\u542f\u52a8\u540c\u6b65\u3002Harness Desktop \u6765\u81ea DeepSeek \u5b98\u65b9\u53d1\u5e03\u6e20\u9053\uff1b\u5176\u63d0\u4f9b\u65b9\u4e0e\u672c\u5730 API \u9700\u5728\u684c\u9762\u7aef\u5185\u624b\u52a8\u914d\u7f6e\uff0c\u4f34\u822a\u4e0d\u6539\u5199\u5176\u914d\u7f6e\u3002\u9000\u51fa\u4f34\u822a\u4e0d\u4f1a\u5173\u95ed\u4efb\u4f55\u524d\u7aef\u3002"))
+        apps_description = QLabel("Pi WebUI \u6765\u81ea xing-shuyin/pi-web-ui \u793e\u533a\u9879\u76ee\uff1b\u672c\u5730 API \u9700\u5728 WebUI \u4e2d\u624b\u52a8\u914d\u7f6e\u6216\u901a\u8fc7\u4e00\u952e\u542f\u52a8\u540c\u6b65\u3002Harness Desktop \u6765\u81ea DeepSeek \u5b98\u65b9\u53d1\u5e03\u6e20\u9053\uff1b\u5176\u63d0\u4f9b\u65b9\u4e0e\u672c\u5730 API \u9700\u5728\u684c\u9762\u7aef\u5185\u624b\u52a8\u914d\u7f6e\uff0c\u4f34\u822a\u4e0d\u6539\u5199\u5176\u914d\u7f6e\u3002\u9000\u51fa\u4f34\u822a\u4e0d\u4f1a\u5173\u95ed\u4efb\u4f55\u524d\u7aef\u3002")
+        apps_description.setWordWrap(True)
+        apps_layout.addWidget(apps_description)
         app_labels = {"pi": "Pi WebUI (community)", "dsh_desktop": "Harness Desktop (official)"}
         action_labels = {"configure": "\u914d\u7f6e\u8def\u5f84", "start": "\u542f\u52a8", "open": "\u6253\u5f00", "stop": "\u505c\u6b62\u672c\u7a97\u53e3\u542f\u52a8", "force_stop": "\u5f3a\u5236\u5173\u95ed\u5b9e\u4f8b"}
         for app_id, app_label in app_labels.items():
-            app_row = QHBoxLayout()
-            app_row.addWidget(QLabel(app_label))
+            status_row = QHBoxLayout()
+            status_row.addWidget(QLabel(app_label))
             state = QLabel("\u6b63\u5728\u68c0\u6d4b\u2026" if companion_apps is not None else "\u7ec4\u4ef6\u7ba1\u7406\u6a21\u5757\u4e0d\u53ef\u7528")
             state.setWordWrap(True)
             setattr(self, f"{app_id}_state_label", state)
-            app_row.addWidget(state, 1)
+            status_row.addWidget(state, 1)
+            apps_layout.addLayout(status_row)
+            first_actions = QHBoxLayout()
+            second_actions = QHBoxLayout()
+            second_actions.addStretch()
             for action_id, label in action_labels.items():
                 if app_id == "pi":
                     label = {"start": "\u542f\u52a8 WebUI", "open": "\u6253\u5f00 WebUI",
@@ -1271,8 +1291,9 @@ class MainWindow(QMainWindow):
                 control = button(label, handler)
                 setattr(self, f"{app_id}_{action_id}_btn", control)
                 control.setEnabled(companion_apps is not None and action_id == "configure")
-                app_row.addWidget(control)
-            apps_layout.addLayout(app_row)
+                (first_actions if action_id in ("configure", "start", "open") else second_actions).addWidget(control)
+            apps_layout.addLayout(first_actions)
+            apps_layout.addLayout(second_actions)
         connect_row = QHBoxLayout()
         connect_row.addWidget(QLabel("\u672c\u5730 API \u5730\u5740"))
         self.companion_api_address = QLineEdit()
@@ -1284,7 +1305,7 @@ class MainWindow(QMainWindow):
         self.pi_help_btn.setEnabled(False)
         connect_row.addWidget(self.pi_help_btn)
         apps_layout.addLayout(connect_row)
-        layout.addWidget(apps_card)
+        self.companion_apps_card = apps_card
         layout.addStretch()
 
         self.advanced_controls = QWidget()
@@ -1357,6 +1378,7 @@ class MainWindow(QMainWindow):
         dsh_danger_row.addWidget(self.dsh_force_btn)
         dsh_layout.addLayout(dsh_danger_row)
         advanced_layout.addWidget(dsh_card)
+        advanced_layout.insertWidget(advanced_layout.count(), self.companion_apps_card)
         advanced_layout.addStretch()
         QTimer.singleShot(0, self.refresh_start_choices)
 
@@ -1437,9 +1459,9 @@ class MainWindow(QMainWindow):
         link = self._selected_frontend_link()
         self.frontend_link_edit.setText(link)
         self.frontend_link_edit.setPlaceholderText(
-            "\\u684c\\u9762\\u7aef\\u6ca1\\u6709\\u7f51\\u9875\\u94fe\\u63a5" if app_id == "dsh_desktop" else
-            "\\u5c1a\\u65e0\\u53ef\\u7528\\u7684\\u8ba4\\u8bc1\\u94fe\\u63a5" if app_id == "dsh_web" else
-            "Pi WebUI \\u5c1a\\u672a\\u5c31\\u7eea")
+            "\u684c\u9762\u7aef\u6ca1\u6709\u7f51\u9875\u94fe\u63a5" if app_id == "dsh_desktop" else
+            "\u5c1a\u65e0\u53ef\u7528\u7684\u8ba4\u8bc1\u94fe\u63a5" if app_id == "dsh_web" else
+            "Pi WebUI \u5c1a\u672a\u5c31\u7eea")
         self.frontend_copy_btn.setEnabled(bool(link) and not self.busy and not self.quitting)
         instances = (self.dsh_status.get("instances") or []) if app_id == "dsh_web" else ((self.companion_app_status.get(app_id) or {}).get("instances") or [])
         self.frontend_force_btn.setEnabled(bool(instances) and not self.busy and not self.quitting)
@@ -1457,10 +1479,10 @@ class MainWindow(QMainWindow):
     def copy_selected_frontend_link(self, *_):
         link = self._selected_frontend_link()
         if not link:
-            self._note("\\u6240\\u9009\\u524d\\u7aef\\u5f53\\u524d\\u6ca1\\u6709\\u53ef\\u590d\\u5236\\u7684\\u7f51\\u9875\\u94fe\\u63a5\\u3002")
+            self._note("\u6240\u9009\u524d\u7aef\u5f53\u524d\u6ca1\u6709\u53ef\u590d\u5236\u7684\u7f51\u9875\u94fe\u63a5\u3002")
             return
         QApplication.clipboard().setText(link)
-        self._note("\\u524d\\u7aef\\u94fe\\u63a5\\u5df2\\u590d\\u5236\\u3002")
+        self._note("\u524d\u7aef\u94fe\u63a5\u5df2\u590d\u5236\u3002")
 
     def open_selected_frontend(self, *_):
         app_id = self._selected_frontend_id()
@@ -1468,25 +1490,25 @@ class MainWindow(QMainWindow):
             if self.dsh and self.dsh_status.get("can_open"):
                 self._action(self.dsh.open_web, lambda _result: self.refresh_dsh())
             else:
-                self._note("Harness \\u7f51\\u9875\\u7aef\\u5c1a\\u65e0\\u53ef\\u6253\\u5f00\\u7684\\u8ba4\\u8bc1\\u94fe\\u63a5\\uff1b\\u8bf7\\u5148\\u5355\\u72ec\\u542f\\u52a8\\u6216\\u8fde\\u63a5 DSH\\u3002")
+                self._note("Harness \u7f51\u9875\u7aef\u5c1a\u65e0\u53ef\u6253\u5f00\u7684\u8ba4\u8bc1\u94fe\u63a5\uff1b\u8bf7\u5148\u5355\u72ec\u542f\u52a8\u6216\u8fde\u63a5 DSH\u3002")
             return
         if not self._pi_webui_ready() and app_id == "pi":
-            self._note("Pi WebUI \\u5c1a\\u672a\\u5c31\\u7eea\\uff1b\\u672a\\u5c1d\\u8bd5\\u542f\\u52a8\\u7ec8\\u7aef\\u7248 Pi\\u3002")
+            self._note("Pi WebUI \u5c1a\u672a\u5c31\u7eea\uff1b\u672a\u5c1d\u8bd5\u542f\u52a8\u7ec8\u7aef\u7248 Pi\u3002")
             return
         self.run_companion_app_action(app_id, "open_app")
 
     def start_model_and_frontend(self, *_):
         if not self.model_session:
-            self._note(self.read_only_reason or "\\u5f53\\u524d\\u4e3a\\u53ea\\u8bfb\\u6a21\\u5f0f\\uff0c\\u8bf7\\u5148\\u63a5\\u7ba1\\u6a21\\u578b\\u63a7\\u5236\\u3002")
+            self._note(self.read_only_reason or "\u5f53\u524d\u4e3a\u53ea\u8bfb\u6a21\u5f0f\uff0c\u8bf7\u5148\u63a5\u7ba1\u6a21\u578b\u63a7\u5236\u3002")
             return
         state = self.last_status.get("state")
         if state == "RUNNING" and self.last_status.get("api_online"):
-            self._note("\\u672c\\u5730\\u6a21\\u578b API \\u5df2\\u5c31\\u7eea\\uff1b\\u6b63\\u5728\\u6253\\u5f00\\u6240\\u9009\\u524d\\u7aef\\u3002")
+            self._note("\u672c\u5730\u6a21\u578b API \u5df2\u5c31\u7eea\uff1b\u6b63\u5728\u6253\u5f00\u6240\u9009\u524d\u7aef\u3002")
             self.open_selected_frontend()
             return
         selected = self.model_combo.currentData()
         if not selected:
-            self._note("\\u8bf7\\u5148\\u9009\\u62e9\\u672c\\u5730\\u6a21\\u578b\\u3002")
+            self._note("\u8bf7\u5148\u9009\u62e9\u672c\u5730\u6a21\u578b\u3002")
             return
         self._pending_frontend_open = self._selected_frontend_id()
         self.start_model()
@@ -2060,7 +2082,8 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(0, self.request_exit)
 
     def _note(self, message: str):
-        self.note_label.setText(message)
+        self.prep_hint.setText(message)
+        self.prep_hint.setVisible(True)
 
     def _action(self, job, after=None):
         if self.busy or self.quitting:
@@ -2358,7 +2381,10 @@ class MainWindow(QMainWindow):
                              and not self.busy and not working and not self.quitting)
         self.start_btn.setEnabled(can_open_frontend)
         self.start_btn.setVisible(True)
-        self.model_only_start_btn.setEnabled(ready and writable and can_start_selected and not running and not instances and not self.busy and not working and not self.quitting)
+        can_start_model_only = (ready and writable and can_start_selected and not running
+                                and not instances and not self.busy and not working and not self.quitting)
+        self.home_model_only_start_btn.setEnabled(can_start_model_only)
+        self.model_only_start_btn.setEnabled(can_start_model_only)
         self.switch_btn.setEnabled(ready and writable and can_start_selected and running and not self.busy and not working and not self.quitting)
         self.stop_btn.setEnabled(ready and writable and running and not self.busy and not working and not self.quitting)
         self.stop_btn.setVisible(running)
