@@ -19,7 +19,7 @@ DIST_DIR = BUILD_DIR / "dist"
 RELEASE_DIR = BASE_DIR / "release"
 STAGED = DIST_DIR / "DSH-Companion"
 PUBLISH = RELEASE_DIR / "DSH-Companion"
-ZIP_PATH = RELEASE_DIR / "DSH-Companion-v0.1.0-windows-x64.zip"
+ZIP_PATH = RELEASE_DIR / "DSH-Companion-v0.2.0-windows-x64.zip"
 FINAL_EXE = BASE_DIR / "DSH-Companion.exe"
 
 

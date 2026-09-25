@@ -16,10 +16,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT_NAME = "deepseek-harness-companion"
-RELEASE_VERSION = "v0.1.0"
+RELEASE_VERSION = "v0.2.0"
 MANAGER_MODULES = {
     "app_paths.py", "autostart.py", "backend.py", "build_exe.py",
-    "button_feedback.py",
+    "button_feedback.py", "companion_apps.py",
     "chat_client.py", "component_updates.py", "deploy_config.py",
     "dsh_integration.py", "dsh_service.py",
     "hf_downloads.py", "library_page.py", "lifecycle.py", "main.py",

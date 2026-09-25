@@ -377,7 +377,7 @@ def migrate_legacy_config() -> Dict[str, Any]:
 def _fresh_config() -> Dict[str, Any]:
     """Usable first-run state without an installed engine or model weight."""
     return {
-        "version": "0.1.0", "schema_version": 2,
+        "version": "0.2.0", "schema_version": 2,
         "active_profile": "select_model", "autostart_model_on_manager_open": False,
         "autostart_windows": False, "server_executable": "",
         "minimize_to_tray": False, "close_action": "ask",
@@ -1083,7 +1083,7 @@ def start_model(profile_id: Optional[str] = None, preset_id: Optional[str] = _PR
                 return {"success": False, "message": "Preset model binding differs from the selected model"}
             effective_params = validation["effective"]
             alias = "model-" + profile_id[:12]
-            profile = {"id": profile_id, "name": selected_model["name"], "alias": alias,
+            profile = {"id": profile_id, "name": selected_model.get("display_name") or selected_model["name"], "alias": alias,
                        "model_path": selected_model["path"], "template_path": "",
                        "catalog_model_id": profile_id, "last_preset_id": preset_id, **effective_params}
             if inherit_selection and not preset:
@@ -1644,9 +1644,18 @@ def get_active_endpoint() -> Dict[str, Any]:
             pass
     effective = record.get("effective_parameters", {}) if record else {}
     context = status.get("active_ctx_size")
+    display_name = profile.get("name") or ""
+    if catalog_id:
+        try:
+            import model_catalog
+            catalog_row = model_catalog.get_model(catalog_id)
+            if catalog_row:
+                display_name = catalog_row.get("display_name") or catalog_row.get("name") or display_name
+        except (OSError, ValueError):
+            pass
     return {"success": ready, "state": status.get("state"), "api_online": bool(status.get("api_online")),
             "base_url": f"http://127.0.0.1:{status['port']}/v1", "port": status["port"],
-            "catalog_model_id": catalog_id, "active_profile": status.get("active_profile"),
+            "catalog_model_id": catalog_id, "display_name": display_name, "active_profile": status.get("active_profile"),
             "model_id": served, "context_size": context,
             "max_output_tokens": (effective.get("n_predict") if type(effective.get("n_predict")) is int else None),
             "reasoning_mode": effective.get("reasoning_effort", "unknown") if record else "unknown",

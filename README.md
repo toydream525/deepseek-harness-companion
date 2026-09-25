@@ -3,20 +3,19 @@
 
   # DSH 伴航
 
-  **让本地模型与 DeepSeek Harness 在 Windows 上更容易一起工作。**
+  **一键启动本地模型；DSH、Pi WebUI 和 Harness Desktop 都可单独使用。**
 
   简体中文 · [English](README.en.md)
 
-  `v0.1.0` · `Windows x64` · [`MIT`](LICENSE)
+  `v0.2.0` · `Windows x64` · [`MIT`](LICENSE)
 
-  **[下载安装版](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-Setup-v0.1.0-windows-x64.exe)** · [便携 ZIP](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-v0.1.0-windows-x64.zip) · **[详细配置说明](docs/GETTING_STARTED.zh-CN.md)** · [项目主页](https://yuriaqua.com/harness)
+  **[下载安装版](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.2.0/DSH-Companion-Setup-v0.2.0-windows-x64.exe)** · [便携 ZIP](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.2.0/DSH-Companion-v0.2.0-windows-x64.zip) · **[详细配置说明](docs/GETTING_STARTED.zh-CN.md)** · [项目主页](https://yuriaqua.com/harness)
 
   <small>模型与运行环境准备见<a href="docs/GETTING_STARTED.zh-CN.md">详细配置说明</a>。</small>
 </div>
 
 ![DSH 伴航真实界面](docs/images/app-preview.png)
-
-在一个桌面窗口里选择 GGUF 模型、启动本地 API、试聊，并管理 DSH 的本地或云端模型提供方。
+独立启动 GGUF 本地 API、试聊，需要时再管理 DSH 提供方。Pi WebUI 来自社区 [xing-shuyin/pi-web-ui](https://github.com/xing-shuyin/pi-web-ui)；Harness Desktop 是 DeepSeek 官方程序。
 
 ## 能做什么
 
@@ -31,7 +30,7 @@
 
 1. **安装软件。** 运行上方安装包；使用便携版时，先完整解压 ZIP，再打开 `DSH-Companion.exe`。
 2. **准备组件和模型。** 从 [llama.cpp 官方发布页](https://github.com/ggml-org/llama.cpp/releases)获取适合本机的引擎，在软件中选择 `llama-server.exe`；从 Hugging Face 自行下载 GGUF 并添加到模型库。需要 DSH 时，再准备 [Node.js](https://nodejs.org/en/download) 与 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。
-3. **启动并验证。** 在首页启动模型，到「试聊」获取真实回答；需要 DSH 时，完成认证连接与提供方接入，再开新会话验证。
+3. **启动并验证。** 在首页独立启动本地模型，到「试聊」验证回答。DSH、Pi WebUI 和 Harness Desktop 是可选应用，分别管理。
 
 第一次使用请看 [入门与完整配置](docs/GETTING_STARTED.zh-CN.md)。你也可以把 [AI 代配任务](docs/AI_SETUP.zh-CN.md)交给 AI，在本机逐步执行。
 

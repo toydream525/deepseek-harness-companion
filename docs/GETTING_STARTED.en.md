@@ -37,6 +37,8 @@ powershell.exe -NoProfile -File .\scripts\deploy\Deploy.ps1 -Mode Uncensored32K 
 
 The launcher calls the packaged EXE, so it needs no separate Python. It rejects machines whose original hardware conditions cannot be confirmed; use the app's general preset flow on other systems. If PowerShell policy blocks the script, inspect its source first. You may use `Set-ExecutionPolicy -Scope Process RemoteSigned` in the **current window only**, or use the in-app import instead of changing global policy.
 
+> In this review, the current external llama-server build11149 using Huihui IQ3_S with froggeric v22.5 at 32K generated 128 `/` characters for "hello". Toggling thinking did not change the result. The cause remains unknown; the external process was not modified or stopped. This observation applies only to that instance.
+
 ## 3. Connect DeepSeek Harness
 
 Only DSH users need [official Node.js](https://nodejs.org/en/download) and [DeepSeek Harness upstream](https://github.com/deepseek-ai/deepseek-harness). Install a complete local DSH tree following upstream instructions; a one-off `npx` run is not a selected local installation. You can also explicitly prepare the app's reviewed pinned version under Component Updates.

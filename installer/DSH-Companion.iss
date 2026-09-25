@@ -1,4 +1,4 @@
-#define AppVersion "0.1.0"
+#define AppVersion "0.2.0"
 #define AppName "DSH 伴航"
 
 [Setup]
@@ -21,7 +21,7 @@ OutputBaseFilename=DSH-Companion-Setup-v{#AppVersion}-windows-x64
 SetupIconFile=..\manager\assets\companion.ico
 UninstallDisplayIcon={app}\DSH-Companion.exe
 UninstallDisplayName={#AppName}
-VersionInfoVersion=0.1.0.0
+VersionInfoVersion=0.2.0.0
 VersionInfoDescription=DSH Companion installer
 Compression=lzma2
 SolidCompression=yes

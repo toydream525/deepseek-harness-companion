@@ -37,6 +37,8 @@ powershell.exe -NoProfile -File .\scripts\deploy\Deploy.ps1 -Mode Uncensored32K 
 
 脚本使用已安装 EXE，不需额外 Python。它会拒绝无法确认满足原目标机条件的电脑；其他硬件可在应用里手工建通用预设。若 PowerShell 策略阻止脚本，先核对来源与内容；可以在**当前窗口**自行设置 `Set-ExecutionPolicy -Scope Process RemoteSigned`，或者直接使用应用内导入，不修改全局策略。
 
+> 本轮复核中，当前外部 llama-server build11149 使用 Huihui IQ3_S 与 froggeric v22.5 32K 配置时，对你好生成了 128 个 `/`。thinking 开关不改变结果；尚未定位原因，也未修改或停止该外部进程。此观察仅适用于该实例，不能据此判断其他模型或配置。
+
 ## 3. 接入 DeepSeek Harness
 
 只有想用 DSH 时才需要 [Node.js 官方下载](https://nodejs.org/en/download) 和 [DeepSeek Harness 官方项目](https://github.com/deepseek-ai/deepseek-harness)。按上游说明安装完整 DSH 本地目录；一次性的 `npx` 临时运行不能代替可绑定的本地目录。也可以在应用「组件更新」主动准备经过审核的固定版本。

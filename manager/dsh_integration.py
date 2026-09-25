@@ -824,7 +824,7 @@ class DSHIntegration:
                 if credential_ref is None:
                     return _fail("无法分配独立的本地凭据引用", "credential-collision")
                 created_ref = credential_ref
-            model = {"id": model_id, "name": model_id,
+            model = {"id": model_id, "name": endpoint.get("display_name") or model_id,
                      "context_window": context, "max_tokens": requested}
             data = {"id": route, "kind": "local", "display_name": f"本地 {model_id}",
                     "base_url": base_url, "api": "openai-completions", "models": [model],

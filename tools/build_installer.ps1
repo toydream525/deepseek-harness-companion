@@ -7,7 +7,7 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $releaseDir = Join-Path $projectRoot 'release'
 $payload = Join-Path $releaseDir 'DSH-Companion'
 $script = Join-Path $projectRoot 'installer\DSH-Companion.iss'
-$output = Join-Path $releaseDir 'DSH-Companion-Setup-v0.1.0-windows-x64.exe'
+$output = Join-Path $releaseDir 'DSH-Companion-Setup-v0.2.0-windows-x64.exe'
 
 if (-not (Test-Path -LiteralPath (Join-Path $payload 'DSH-Companion.exe'))) {
     throw '先运行 manager/build_exe.py 生成干净的 release/DSH-Companion。'

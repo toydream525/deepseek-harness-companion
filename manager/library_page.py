@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QTimer, QUrl, Signal, QSize
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
-    QCheckBox, QComboBox, QFileDialog, QFrame, QHBoxLayout, QLabel, QLineEdit,
+    QCheckBox, QComboBox, QFileDialog, QFrame, QHBoxLayout, QLabel, QLineEdit, QInputDialog,
     QPushButton, QScrollArea, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
     QTabWidget, QMenu, QHeaderView,
 )
@@ -199,7 +199,7 @@ class LibraryPage(QWidget):
             size_text = f"{size / (1024 ** 3):.2f} GB" if isinstance(size, (int, float)) else "未知"
             state = ("投影文件 / 不可单独启动" if row.get("startable") is False else
                      "完整" if row.get("complete") else "分片缺失 / 文件异常")
-            name = ("★ " if row.get("favorite") else "") + str(row.get("name") or row.get("id"))
+            name = ("★ " if row.get("favorite") else "") + str(row.get("display_name") or row.get("name") or row.get("id"))
             item = QTreeWidgetItem([name, str(row.get("architecture") or "未知"),
                                     str(row.get("quantization") or "未知"), size_text,
                                     state, str(row.get("source") or "本地")])
@@ -243,6 +243,17 @@ class LibraryPage(QWidget):
         path, _ = QFileDialog.getOpenFileName(self, "引用已有 GGUF", str(MODELS), "GGUF 模型 (*.gguf)")
         if path:
             self.host._async("library_add", lambda: model_catalog.add_model(path),
+                             lambda result: (self._result(result), self.refresh_models()))
+
+    def rename_model(self):
+        row = self._selected_row()
+        if not row:
+            return
+        value, accepted = QInputDialog.getText(self, "\u7f16\u8f91\u6a21\u578b\u663e\u793a\u540d",
+                                               "\u663e\u793a\u540d\uff08\u4ec5\u7528\u4e8e\u754c\u9762\uff0c\u5185\u90e8 ID \u4e0d\u53d8\uff09",
+                                               text=str(row.get("display_name") or row.get("name") or ""))
+        if accepted:
+            self.host._async("model_display_name", lambda: model_catalog.set_display_name(row["id"], value),
                              lambda result: (self._result(result), self.refresh_models()))
 
     def toggle_favorite(self):

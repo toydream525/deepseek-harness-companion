@@ -57,6 +57,10 @@ try:
     from dsh_integration import DSHIntegration
 except ImportError:
     DSHIntegration = None
+try:
+    import companion_apps
+except ImportError:
+    companion_apps = None
 
 try:
     from styles import app_icon, app_stylesheet
@@ -68,7 +72,7 @@ except ImportError:
         return ""
 
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.2.0"
 TITLE = f"DSH 伴航 · Harness Companion v{APP_VERSION}"
 INSTANCE_NAME = "DSH_Companion_Native_SingleInstance"
 FIELDS = [
@@ -230,7 +234,7 @@ class WelcomeDialog(QDialog):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 20, 24, 20)
         layout.setSpacing(13)
-        heading = QLabel("把本地模型接入 DSH，从这里开始")
+        heading = QLabel("\u4ece\u72ec\u7acb\u542f\u52a8\u672c\u5730\u6a21\u578b\u5f00\u59cb")
         heading.setObjectName("pageTitle")
         layout.addWidget(heading)
         intro = QLabel("DSH 伴航是独立的 Windows 本地模型与 API 控制台，也能管理 DSH 提供方。它不是 DeepSeek Harness 官方产品。")
@@ -250,7 +254,7 @@ class WelcomeDialog(QDialog):
         for item in (
             "1  选择引擎和模型文件，检测路径与能力；若文件缺失，先按内置指南下载或复制。",
             "2  按需导入内置 Qwen3.8 参考配置，并匹配对应模型和 froggeric 模板；也可以为其他 GGUF 自建预设。导入不自动下载或启动。",
-            "3  检查参数并启动模型，在“试聊”验证回答；需要 Agent 时再连接 DSH。",
+            "3  \u68c0\u67e5\u53c2\u6570\u5e76\u542f\u52a8\u6a21\u578b\uff0c\u5728\u201c\u8bd5\u804a\u201d\u9a8c\u8bc1\u56de\u7b54\uff1b\u9700\u8981 Agent \u65f6\u518d\u6309\u9700\u63a5\u5165 DSH\u3002",
         ):
             label = QLabel(item)
             label.setWordWrap(True)
@@ -313,15 +317,19 @@ class MainWindow(QMainWindow):
         self.workflow_ready = False
         self._request_seq = 0
         self.dsh_pending = False
+        self.companion_apps_pending = False
+        self.companion_app_status: dict = {}
         self._build_ui()
         self._setup_tray()
         self._update_buttons()
         self.poll_timer = QTimer(self)
         self.poll_timer.timeout.connect(self.refresh_status)
         self.poll_timer.timeout.connect(self.refresh_dsh)
+        self.poll_timer.timeout.connect(self.refresh_companion_apps)
         self.poll_timer.start(5000)
         self.refresh_status()
         self.refresh_dsh()
+        self.refresh_companion_apps()
         if not self.cfg.get("onboarding_seen", False):
             QTimer.singleShot(350, self.show_welcome_dialog)
         if self.model_session and self.cfg.get("autostart_model_on_manager_open"):
@@ -1126,7 +1134,7 @@ class MainWindow(QMainWindow):
     def _overview_page(self):
         scroll, _, layout = scroll_page()
         self.stack.addWidget(scroll)
-        self._title(layout, "首页", "本地模型与 DeepSeek Harness 的运行状态，一眼看清。")
+        self._title(layout, "\u9996\u9875", "\u672c\u5730\u6a21\u578b\u53ef\u72ec\u7acb\u542f\u52a8\uff1bDeepSeek Harness \u53ef\u6309\u9700\u63a5\u5165\u3002")
         hero, hero_layout = card()
         hero.setObjectName("heroCard")
         hero.setMinimumHeight(560)
@@ -1191,24 +1199,36 @@ class MainWindow(QMainWindow):
         summary_layout.addWidget(divider2)
         dsh_row = QHBoxLayout()
         dsh_row.setContentsMargins(0, 13, 0, 6)
-        dsh_title = QLabel("DSH 连接")
+        dsh_title = QLabel("\u6a21\u578b\u524d\u7aef")
         dsh_title.setObjectName("homeRowLabel")
         dsh_title.setFixedWidth(116)
         dsh_row.addWidget(dsh_title)
-        self.quick_dsh_state = QLabel("正在检测…")
+        self.frontend_combo = QComboBox()
+        self.frontend_combo.addItem("Harness \u7f51\u9875\u7aef", "dsh_web")
+        self.frontend_combo.addItem("Harness \u684c\u9762\u7aef", "dsh_desktop")
+        self.frontend_combo.addItem("Pi WebUI", "pi")
+        self.frontend_combo.currentIndexChanged.connect(self._update_frontend_link)
+        dsh_row.addWidget(self.frontend_combo)
+        self.quick_dsh_state = QLabel("\u6b63\u5728\u68c0\u6d4b\u2026")
         self.quick_dsh_state.setObjectName("homeRowValue")
         dsh_row.addWidget(self.quick_dsh_state, 1)
         summary_layout.addLayout(dsh_row)
+        self.frontend_link_edit = QLineEdit()
+        self.frontend_link_edit.setReadOnly(True)
+        self.frontend_link_edit.setPlaceholderText("\u6240\u9009\u524d\u7aef\u7684\u53ef\u7528\u94fe\u63a5")
+        summary_layout.addWidget(self.frontend_link_edit)
         hero_layout.addWidget(summary)
 
         actions = QHBoxLayout()
         actions.setSpacing(14)
-        self.start_btn = button("一键启动", self.start_local_work_from_overview, "primaryButton")
-        self.start_btn.setToolTip("启动或复用所选本地模型，接入 DSH 并打开认证界面。")
-        self.stop_btn = button("停止本应用服务", self.stop_owned_services)
-        self.dsh_open_btn = button("打开 DSH", self.open_dsh)
-        self.chat_nav_btn = button("试聊", lambda: self.nav.setCurrentRow(5))
-        for widget in (self.start_btn, self.stop_btn, self.dsh_open_btn, self.chat_nav_btn):
+        self.start_btn = button("\u4e00\u952e\u542f\u52a8", self.start_model_and_frontend, "primaryButton")
+        self.start_btn.setToolTip("\u542f\u52a8\u6216\u590d\u7528\u6240\u9009\u672c\u5730\u6a21\u578b\uff0c\u7b49\u5f85 API \u5c31\u7eea\u540e\u6253\u5f00\u6240\u9009\u524d\u7aef\u3002")
+        self.stop_btn = button("\u505c\u6b62\u672c\u5730\u6a21\u578b", self.stop_model)
+        self.dsh_open_btn = button("\u6253\u5f00\u524d\u7aef", self.open_selected_frontend)
+        self.frontend_copy_btn = button("\u590d\u5236\u94fe\u63a5", self.copy_selected_frontend_link)
+        self.frontend_force_btn = button("\u5f3a\u5236\u5173\u95ed\u6240\u9009\u524d\u7aef", self.force_close_selected_frontend, "dangerButton")
+        self.chat_nav_btn = button("\u8bd5\u804a", lambda: self.nav.setCurrentRow(5))
+        for widget in (self.start_btn, self.stop_btn, self.dsh_open_btn, self.frontend_copy_btn, self.frontend_force_btn, self.chat_nav_btn):
             widget.setProperty("homeAction", True)
             widget.setMinimumHeight(56)
             actions.addWidget(widget, 1)
@@ -1225,6 +1245,46 @@ class MainWindow(QMainWindow):
         self.note_label.setWordWrap(True)
         hero_layout.addWidget(self.note_label)
         layout.addWidget(hero)
+        apps_card, apps_layout = card("\u53ef\u9009\u5e94\u7528")
+        apps_layout.addWidget(QLabel("Pi WebUI \u6765\u81ea xing-shuyin/pi-web-ui \u793e\u533a\u9879\u76ee\uff1b\u672c\u5730 API \u9700\u5728 WebUI \u4e2d\u624b\u52a8\u914d\u7f6e\u6216\u901a\u8fc7\u4e00\u952e\u542f\u52a8\u540c\u6b65\u3002Harness Desktop \u6765\u81ea DeepSeek \u5b98\u65b9\u53d1\u5e03\u6e20\u9053\uff1b\u5176\u63d0\u4f9b\u65b9\u4e0e\u672c\u5730 API \u9700\u5728\u684c\u9762\u7aef\u5185\u624b\u52a8\u914d\u7f6e\uff0c\u4f34\u822a\u4e0d\u6539\u5199\u5176\u914d\u7f6e\u3002\u9000\u51fa\u4f34\u822a\u4e0d\u4f1a\u5173\u95ed\u4efb\u4f55\u524d\u7aef\u3002"))
+        app_labels = {"pi": "Pi WebUI (community)", "dsh_desktop": "Harness Desktop (official)"}
+        action_labels = {"configure": "\u914d\u7f6e\u8def\u5f84", "start": "\u542f\u52a8", "open": "\u6253\u5f00", "stop": "\u505c\u6b62\u672c\u7a97\u53e3\u542f\u52a8", "force_stop": "\u5f3a\u5236\u5173\u95ed\u5b9e\u4f8b"}
+        for app_id, app_label in app_labels.items():
+            app_row = QHBoxLayout()
+            app_row.addWidget(QLabel(app_label))
+            state = QLabel("\u6b63\u5728\u68c0\u6d4b\u2026" if companion_apps is not None else "\u7ec4\u4ef6\u7ba1\u7406\u6a21\u5757\u4e0d\u53ef\u7528")
+            state.setWordWrap(True)
+            setattr(self, f"{app_id}_state_label", state)
+            app_row.addWidget(state, 1)
+            for action_id, label in action_labels.items():
+                if app_id == "pi":
+                    label = {"start": "\u542f\u52a8 WebUI", "open": "\u6253\u5f00 WebUI",
+                             "stop": "\u505c\u6b62\u672c\u7a97\u53e3\u542f\u52a8", "force_stop": "\u5f3a\u5236\u5173\u95ed WebUI"}.get(action_id, label)
+                action = "open_app" if action_id == "open" else action_id
+                handler = ((lambda _=False, aid=app_id: self.configure_companion_app(aid))
+                           if action_id == "configure" else
+                           (lambda _=False, aid=app_id: self.force_close_companion_app(aid))
+                           if action_id == "force_stop" else
+                           (lambda _=False, aid=app_id: self.stop_owned_companion_app(aid))
+                           if action_id == "stop" else
+                           (lambda _=False, aid=app_id, act=action: self.run_companion_app_action(aid, act)))
+                control = button(label, handler)
+                setattr(self, f"{app_id}_{action_id}_btn", control)
+                control.setEnabled(companion_apps is not None and action_id == "configure")
+                app_row.addWidget(control)
+            apps_layout.addLayout(app_row)
+        connect_row = QHBoxLayout()
+        connect_row.addWidget(QLabel("\u672c\u5730 API \u5730\u5740"))
+        self.companion_api_address = QLineEdit()
+        self.companion_api_address.setReadOnly(True)
+        self.companion_api_address.setToolTip("\u4ec5\u590d\u5236\u672c\u5730 API \u5730\u5740\uff0c\u4e0d\u5305\u542b\u8ba4\u8bc1\u5bc6\u94a5\u3002")
+        connect_row.addWidget(self.companion_api_address, 1)
+        connect_row.addWidget(button("\u590d\u5236\u5730\u5740", self.copy_local_api_address))
+        self.pi_help_btn = button("WebUI \u914d\u7f6e\u8bf4\u660e", self.open_pi_connection_help)
+        self.pi_help_btn.setEnabled(False)
+        connect_row.addWidget(self.pi_help_btn)
+        apps_layout.addLayout(connect_row)
+        layout.addWidget(apps_card)
         layout.addStretch()
 
         self.advanced_controls = QWidget()
@@ -1310,23 +1370,281 @@ class MainWindow(QMainWindow):
     def toggle_advanced_controls(self):
         self.nav.setCurrentRow(1)
 
+    def refresh_companion_apps(self):
+        if companion_apps is None or self.quitting or self.companion_apps_pending:
+            return
+        self.companion_apps_pending = True
+        def done(result):
+            self.companion_apps_pending = False
+            data = (result or {}).get("data") if isinstance(result, dict) else None
+            if not isinstance(data, dict):
+                data = {}
+            self.companion_app_status = data
+            self._update_overview_summary()
+            self._update_frontend_link()
+            for app_id in ("pi", "dsh_desktop"):
+                item = data.get(app_id) or {}
+                instances = item.get("instances") or []
+                caps = item.get("capabilities") or {}
+                webui_ready = (app_id != "pi" or bool(caps.get("webui") and item.get("webui_url")))
+                state = getattr(self, f"{app_id}_state_label", None)
+                if state is not None:
+                    state.setToolTip(str(item.get("source_url") or ""))
+                    if app_id == "pi" and not webui_ready:
+                        message = "Pi WebUI \u63a5\u53e3\u5f85\u9a8c\u8bc1\uff1b\u7ec8\u7aef CLI \u4e0d\u4f1a\u4ece\u6b64\u5165\u53e3\u542f\u52a8"
+                    elif not item.get("installed"):
+                        message = "\u672a\u914d\u7f6e\u53ef\u6267\u884c\u6587\u4ef6"
+                    elif item.get("running"):
+                        ownership = "\u672c\u7a97\u53e3\u542f\u52a8" if item.get("owned") else "\u5df2\u8fd0\u884c"
+                        message = f"{ownership} \u00b7 \u8fdb\u7a0b\u6570 {len(instances)}"
+                    else:
+                        message = f"\u5df2\u914d\u7f6e \u00b7 \u672a\u8fd0\u884c \u00b7 {item.get('version') or item.get('source') or ''}".strip()
+                    if app_id == "pi" and item.get("installed"):
+                        connection = item.get("connection")
+                        if connection == "configured":
+                            message += " \u00b7 \u672c\u5730\u6a21\u578b\u5df2\u914d\u7f6e"
+                        else:
+                            message += " \u00b7 \u8bf7\u4e00\u952e\u542f\u52a8\u5b8c\u6210\u8fde\u63a5"
+                    state.setText(message)
+                if app_id == "pi" and hasattr(self, "pi_help_btn"):
+                    self.pi_help_btn.setEnabled(webui_ready and bool(item.get("provider_docs")) and not self.busy)
+                for action_id, enabled in (("configure", app_id == "dsh_desktop"),
+                                           ("start", bool(item.get("installed"))),
+                                           ("open", bool(item.get("installed"))),
+                                           ("stop", bool(item.get("running") and item.get("owned"))),
+                                           ("force_stop", bool(instances))):
+                    control = getattr(self, f"{app_id}_{action_id}_btn", None)
+                    if control is not None:
+                        control.setEnabled(enabled and webui_ready and not self.busy and not self.quitting)
+        self._async("companion_apps_status", companion_apps.status, done)
+
+    def _selected_frontend_id(self) -> str:
+        return self.frontend_combo.currentData() if hasattr(self, "frontend_combo") else "dsh_web"
+
+    def _selected_frontend_link(self) -> str:
+        app_id = self._selected_frontend_id()
+        if app_id == "dsh_web":
+            if self.dsh and self.dsh_status.get("can_open"):
+                return self.dsh.authenticated_link(self.dsh_status) or ""
+            return ""
+        item = self.companion_app_status.get(app_id) or {}
+        return str(item.get("webui_url") or "")
+
+    def _update_frontend_link(self, *_):
+        if not hasattr(self, "frontend_link_edit"):
+            return
+        app_id = self._selected_frontend_id()
+        link = self._selected_frontend_link()
+        self.frontend_link_edit.setText(link)
+        self.frontend_link_edit.setPlaceholderText(
+            "\\u684c\\u9762\\u7aef\\u6ca1\\u6709\\u7f51\\u9875\\u94fe\\u63a5" if app_id == "dsh_desktop" else
+            "\\u5c1a\\u65e0\\u53ef\\u7528\\u7684\\u8ba4\\u8bc1\\u94fe\\u63a5" if app_id == "dsh_web" else
+            "Pi WebUI \\u5c1a\\u672a\\u5c31\\u7eea")
+        self.frontend_copy_btn.setEnabled(bool(link) and not self.busy and not self.quitting)
+        instances = (self.dsh_status.get("instances") or []) if app_id == "dsh_web" else ((self.companion_app_status.get(app_id) or {}).get("instances") or [])
+        self.frontend_force_btn.setEnabled(bool(instances) and not self.busy and not self.quitting)
+        self.dsh_open_btn.setEnabled(not self.busy and not self.quitting and (
+            bool(self.dsh_status.get("can_open")) if app_id == "dsh_web" else
+            bool((self.companion_app_status.get(app_id) or {}).get("installed"))))
+
+    def force_close_selected_frontend(self, *_):
+        app_id = self._selected_frontend_id()
+        if app_id == "dsh_web":
+            self.force_stop_dsh()
+        else:
+            self.force_close_companion_app(app_id)
+
+    def copy_selected_frontend_link(self, *_):
+        link = self._selected_frontend_link()
+        if not link:
+            self._note("\\u6240\\u9009\\u524d\\u7aef\\u5f53\\u524d\\u6ca1\\u6709\\u53ef\\u590d\\u5236\\u7684\\u7f51\\u9875\\u94fe\\u63a5\\u3002")
+            return
+        QApplication.clipboard().setText(link)
+        self._note("\\u524d\\u7aef\\u94fe\\u63a5\\u5df2\\u590d\\u5236\\u3002")
+
+    def open_selected_frontend(self, *_):
+        app_id = self._selected_frontend_id()
+        if app_id == "dsh_web":
+            if self.dsh and self.dsh_status.get("can_open"):
+                self._action(self.dsh.open_web, lambda _result: self.refresh_dsh())
+            else:
+                self._note("Harness \\u7f51\\u9875\\u7aef\\u5c1a\\u65e0\\u53ef\\u6253\\u5f00\\u7684\\u8ba4\\u8bc1\\u94fe\\u63a5\\uff1b\\u8bf7\\u5148\\u5355\\u72ec\\u542f\\u52a8\\u6216\\u8fde\\u63a5 DSH\\u3002")
+            return
+        if not self._pi_webui_ready() and app_id == "pi":
+            self._note("Pi WebUI \\u5c1a\\u672a\\u5c31\\u7eea\\uff1b\\u672a\\u5c1d\\u8bd5\\u542f\\u52a8\\u7ec8\\u7aef\\u7248 Pi\\u3002")
+            return
+        self.run_companion_app_action(app_id, "open_app")
+
+    def start_model_and_frontend(self, *_):
+        if not self.model_session:
+            self._note(self.read_only_reason or "\\u5f53\\u524d\\u4e3a\\u53ea\\u8bfb\\u6a21\\u5f0f\\uff0c\\u8bf7\\u5148\\u63a5\\u7ba1\\u6a21\\u578b\\u63a7\\u5236\\u3002")
+            return
+        state = self.last_status.get("state")
+        if state == "RUNNING" and self.last_status.get("api_online"):
+            self._note("\\u672c\\u5730\\u6a21\\u578b API \\u5df2\\u5c31\\u7eea\\uff1b\\u6b63\\u5728\\u6253\\u5f00\\u6240\\u9009\\u524d\\u7aef\\u3002")
+            self.open_selected_frontend()
+            return
+        selected = self.model_combo.currentData()
+        if not selected:
+            self._note("\\u8bf7\\u5148\\u9009\\u62e9\\u672c\\u5730\\u6a21\\u578b\\u3002")
+            return
+        self._pending_frontend_open = self._selected_frontend_id()
+        self.start_model()
+
+    def _continue_pending_frontend(self):
+        app_id = getattr(self, "_pending_frontend_open", None)
+        if not app_id or self.last_status.get("state") != "RUNNING" or not self.last_status.get("api_online"):
+            return
+        self._pending_frontend_open = None
+        if self._selected_frontend_id() != app_id:
+            self._note("\u6a21\u578b\u5df2\u542f\u52a8\uff1b\u524d\u7aef\u9009\u62e9\u5df2\u66f4\u6539\uff0c\u8bf7\u70b9\u201c\u6253\u5f00\u524d\u7aef\u201d\u7ee7\u7eed\u3002")
+            return
+        if app_id == "dsh_web":
+            self._action(self._connect_local_model_to_dsh, lambda result: self._note(result.get("message", "DSH \u63a5\u5165\u5931\u8d25")))
+        elif app_id == "pi":
+            ensure = getattr(companion_apps, "ensure_local_provider", None) if companion_apps else None
+            if ensure is None:
+                self._note("\u6a21\u578b API \u5df2\u5c31\u7eea\uff1bPi WebUI \u8fde\u63a5\u63a5\u53e3\u5c1a\u672a\u5b9e\u73b0\uff0c\u672a\u62a5\u4e3a\u5df2\u8fde\u901a\u3002")
+                return
+            def connect_pi():
+                endpoint = backend.get_active_endpoint()
+                if not endpoint.get("success"):
+                    return endpoint
+                result = ensure()
+                return result if isinstance(result, dict) else {"success": False, "message": "Pi WebUI \u8fde\u63a5\u64cd\u4f5c\u8fd4\u56de\u65e0\u6548\u7ed3\u679c"}
+            self._action(connect_pi, lambda result: self._open_connected_pi(result))
+        else:
+            self.run_companion_app_action(app_id, "open_app")
+            self._note("\u6a21\u578b API \u5df2\u5c31\u7eea\uff1bHarness Desktop \u5df2\u6253\u5f00\uff0c\u8bf7\u5728\u684c\u9762\u7aef\u4e2d\u624b\u52a8\u914d\u7f6e\u672c\u5730 API\u3002")
+
+    def _open_connected_pi(self, result):
+        if not isinstance(result, dict) or not result.get("success"):
+            self._note("Pi WebUI \u8fde\u63a5\u5931\u8d25\uff1b\u672c\u5730\u6a21\u578b\u4fdd\u6301\u8fd0\u884c\uff1a" + str((result or {}).get("message", "")))
+            return
+        details = result.get("data") or {}
+        def opened(open_result):
+            if not open_result.get("success"):
+                self._note("Pi WebUI \u6a21\u578b\u5df2\u914d\u7f6e\uff0c\u4f46\u6253\u5f00\u5931\u8d25\uff1a" + open_result.get("message", ""))
+            elif details.get("requires_webui_reload"):
+                self._note("Pi WebUI \u672c\u5730\u6a21\u578b\u914d\u7f6e\u5df2\u4fdd\u5b58\uff1b\u8bf7\u5728 WebUI \u91cd\u65b0\u8bfb\u53d6\u6a21\u578b\u5217\u8868\u540e\u4f7f\u7528\u3002")
+            else:
+                self._note("Pi WebUI \u5df2\u914d\u7f6e\u672c\u5730\u6a21\u578b\u5e76\u6253\u5f00\u3002")
+        self._action(lambda: companion_apps.open_app("pi"), opened)
+
+    def _connect_local_model_to_dsh(self):
+        if not self.dsh or not self.integration:
+            return {"success": False, "message": "\u672c\u673a DSH \u63a5\u5165\u6a21\u5757\u4e0d\u53ef\u7528"}
+        current = self.dsh.status()
+        if not current.get("running"):
+            started = self.dsh.start()
+            if not started.get("success"):
+                return {"success": False, "message": started.get("message", "DSH \u542f\u52a8\u5931\u8d25")}
+        registered = self.integration.register_local_model()
+        if not registered.get("success"):
+            return {"success": False, "message": "DSH \u5df2\u4fdd\u6301\u8fd0\u884c\uff0c\u4f46\u672c\u5730\u6a21\u578b\u63d0\u4f9b\u65b9\u672a\u5b8c\u6210\u914d\u7f6e\uff1a" + registered.get("message", "")}
+        data = registered.get("data") or {}
+        provider_id, model_id = data.get("id"), data.get("model_id")
+        if not provider_id or not model_id:
+            return {"success": False, "message": "DSH \u5df2\u4fdd\u6301\u8fd0\u884c\uff0c\u4f46\u672a\u8fd4\u56de\u672c\u5730\u63d0\u4f9b\u65b9\u4fe1\u606f"}
+        current_default = self.integration.get_new_session_default()
+        if not current_default.get("success"):
+            return {"success": False, "message": "DSH \u5df2\u6ce8\u518c\u672c\u5730\u63d0\u4f9b\u65b9\uff0c\u4f46\u672a\u80fd\u66f4\u65b0\u9ed8\u8ba4\u6a21\u578b\uff1a" + current_default.get("message", "")}
+        changed = self.integration.set_new_session_default(provider_id, model_id,
+                                                           expected_revision=current_default.get("revision"))
+        if not changed.get("success"):
+            return {"success": False, "message": "DSH \u5df2\u6ce8\u518c\u672c\u5730\u63d0\u4f9b\u65b9\uff0c\u4f46\u9ed8\u8ba4\u6a21\u578b\u672a\u66f4\u6539\uff1a" + changed.get("message", "")}
+        opened = self.dsh.open_web()
+        self.refresh_dsh()
+        return {"success": bool(opened.get("success")), "message": opened.get("message", "DSH \u5df2\u6253\u5f00")}
+
+    def copy_local_api_address(self, *_):
+        if not hasattr(self, "companion_api_address"):
+            return
+        QApplication.clipboard().setText(self.companion_api_address.text())
+        self._note("\u672c\u5730 API \u5730\u5740\u5df2\u590d\u5236\u3002")
+
+    def open_pi_connection_help(self, *_):
+        if not self._pi_webui_ready():
+            self._note("Pi WebUI \u914d\u7f6e\u8bf4\u660e\u5c1a\u672a\u9a8c\u8bc1\u3002")
+            return
+        url = (self.companion_app_status.get("pi") or {}).get("provider_docs")
+        if url:
+            QDesktopServices.openUrl(QUrl(url))
+        else:
+            self._note("\u6682\u65e0\u53ef\u6838\u5b9e\u7684 WebUI \u914d\u7f6e\u8bf4\u660e\u3002")
+
+    def run_companion_app_action(self, app_id: str, action: str):
+        if companion_apps is None:
+            self._note("\u53ef\u9009\u5e94\u7528\u7ba1\u7406\u6a21\u5757\u5c1a\u672a\u52a0\u8f7d\u3002")
+            return
+        if action not in {"start", "open_app", "stop"}:
+            return
+        if app_id == "pi" and not self._pi_webui_ready():
+            self._note("Pi WebUI \u5c1a\u672a\u901a\u8fc7\u68c0\u6d4b\uff1b\u5df2\u7981\u7528 CLI \u542f\u52a8\u5165\u53e3\u3002")
+            return
+        self._action(lambda: getattr(companion_apps, action)(app_id),
+                     lambda _result: self.refresh_companion_apps())
+
+    def _pi_webui_ready(self) -> bool:
+        item = self.companion_app_status.get("pi") or {}
+        capabilities = item.get("capabilities") or {}
+        return bool(capabilities.get("webui") and item.get("webui_url"))
+
+    def stop_owned_companion_app(self, app_id: str):
+        item = self.companion_app_status.get(app_id) or {}
+        target = next((row for row in item.get("instances", []) if row.get("owned")), None)
+        if companion_apps is None or not target:
+            self._note("\u672c\u7a97\u53e3\u6ca1\u6709\u542f\u52a8\u8fd9\u4e2a\u524d\u7aef\u5b9e\u4f8b\u3002")
+            return
+        self._action(lambda: companion_apps.stop(app_id, target),
+                     lambda _result: self.refresh_companion_apps())
+
+    def force_close_companion_app(self, app_id: str):
+        if companion_apps is None or self.busy or self.quitting:
+            return
+        if app_id == "pi" and not self._pi_webui_ready():
+            self._note("Pi WebUI \u5c1a\u672a\u901a\u8fc7\u68c0\u6d4b\uff1b\u4e0d\u4f1a\u5173\u95ed\u7ec8\u7aef CLI \u5b9e\u4f8b\u3002")
+            return
+        if not hasattr(companion_apps, "force_stop"):
+            self._note("\u5f3a\u5236\u5173\u95ed\u8eab\u4efd\u6838\u9a8c\u5c1a\u4e0d\u53ef\u7528\u3002")
+            return
+        item = self.companion_app_status.get(app_id) or {}
+        instances = item.get("instances") or []
+        if not instances:
+            self._note("\u6ca1\u6709\u68c0\u6d4b\u5230\u53ef\u5173\u95ed\u7684\u8fdb\u7a0b\u5b9e\u4f8b\u3002")
+            self.refresh_companion_apps()
+            return
+        labels = [f"PID {row.get('pid')} \u00b7 {row.get('executable_path') or row.get('path') or row.get('name')} \u00b7 "
+                  f"\u521b\u5efa {row.get('creation_time') or '\u672a\u77e5'}" for row in instances]
+        choice, ok = QInputDialog.getItem(self, "\u5f3a\u5236\u5173\u95ed\u5e94\u7528\u5b9e\u4f8b", "\u7cbe\u786e\u9009\u62e9\u5e76\u6838\u5bf9\u8fdb\u7a0b\u8eab\u4efd", labels, 0, False)
+        if not ok:
+            return
+        target = instances[labels.index(choice)]
+        detail = (f"{item.get('name') or app_id}\nPID: {target.get('pid')}\n"
+                  f"Path: {target.get('executable_path') or target.get('path') or target.get('name')}\n"
+                  f"Created: {target.get('creation_time') or 'unknown'}\n\n"
+                  "\u53ea\u6709\u5728\u8eab\u4efd\u4e0e\u6240\u9009\u8fdb\u7a0b\u5b8c\u5168\u5339\u914d\u65f6\u624d\u4f1a\u5173\u95ed\u3002")
+        if QMessageBox.question(self, TITLE, detail) != QMessageBox.StandardButton.Yes:
+            return
+        self._action(lambda: companion_apps.force_stop(app_id, target),
+                     lambda _result: self.refresh_companion_apps())
+
+    def configure_companion_app(self, app_id: str):
+        if app_id == "pi" and not self._pi_webui_ready():
+            self._note("Pi WebUI \u63a5\u53e3\u5c1a\u672a\u6838\u5b9e\uff0c\u6682\u4e0d\u652f\u6301\u914d\u7f6e\u8def\u5f84\u3002")
+            return
+        if companion_apps is None or self.busy or self.quitting:
+            self._note("\u53ef\u9009\u5e94\u7528\u7ba1\u7406\u6a21\u5757\u5c1a\u672a\u52a0\u8f7d\u3002")
+            return
+        path, _ = QFileDialog.getOpenFileName(self, "\u9009\u62e9\u5e94\u7528\u53ef\u6267\u884c\u6587\u4ef6", "", "\u5e94\u7528\u7a0b\u5e8f (*.exe *.cmd *.bat);;\u6240\u6709\u6587\u4ef6 (*.*)")
+        if not path:
+            return
+        self._action(lambda: companion_apps.configure(app_id, path),
+                     lambda _result: self.refresh_companion_apps())
+
     def start_local_work_from_overview(self):
-        if self.busy or self.quitting:
-            return
-        if not self.start_btn.isEnabled():
-            self._note(self.prep_hint.text())
-            return
-        self.workflow_error = ""
-        self.workflow_ready = False
-        self.workflow_stage = "启动模型 → 连接 DSH → 配置本地模型 → 就绪：正在检查所需组件…"
-        self.prep_hint.setText(self.workflow_stage)
-        self.prep_hint.show()
-        self._note(self.workflow_stage)
-        self.provider_page.start_local_work()
-        if not self.provider_page.workflow_running:
-            self.workflow_stage = ""
-            self.workflow_error = "未启动：" + self.provider_page.stage.text()
-            self._update_buttons()
+        """Start only the selected local model; DSH integration remains optional."""
+        self.start_model()
 
     def _show_home_work_stage(self, message: str):
         if not self.provider_page.workflow_running:
@@ -1344,23 +1662,8 @@ class MainWindow(QMainWindow):
         self.state_label.setText(f"正在准备：{current}")
 
     def stop_owned_services(self):
-        if self.busy or self.quitting or self.provider_page.workflow_running:
-            return
-        self.cancel_chat()
-        def work():
-            messages = []
-            if self.dsh:
-                dsh_result = self.dsh.cleanup()
-                if not dsh_result.get("success"):
-                    return dsh_result
-                messages.append("本窗口启动的 DSH 已停止；外部实例保留")
-            if self.model_session and not self.last_status.get("control_read_only"):
-                model_result = backend.stop_model()
-                if not model_result.get("success"):
-                    return model_result
-                messages.append("本应用管理的模型已停止")
-            return {"success": True, "message": "；".join(messages) or "本应用没有需要停止的服务"}
-        self._action(work, lambda _result: self.refresh_dsh())
+        """Compatibility handler for the overview; it only stops the local model."""
+        self.stop_model()
 
     def refresh_start_choices(self, preferred_model: str | None = None):
         def fetch():
@@ -1382,7 +1685,7 @@ class MainWindow(QMainWindow):
             self.model_combo.addItem("尚未选择模型" if active_profile == "select_model"
                                      else "当前配置档位", active_profile)
         for row in models:
-            title = row.get("name") or row.get("id")
+            title = row.get("display_name") or row.get("name") or row.get("id")
             suffix = (" · 投影文件/不可单独启动" if row.get("startable") is False else
                       " · 文件不完整" if not row.get("complete") else "")
             self.model_combo.addItem(f"{title}{suffix}", row.get("id"))
@@ -1628,7 +1931,7 @@ class MainWindow(QMainWindow):
         self.close_action_combo.currentIndexChanged.connect(self.save_close_action)
         close_row.addWidget(self.close_action_combo, 1)
         startup_layout.addLayout(close_row)
-        startup_layout.addWidget(QLabel("托盘不可用时窗口留在任务栏；退出只停止本应用启动的模型与 DSH。"))
+        startup_layout.addWidget(QLabel("\u6258\u76d8\u4e0d\u53ef\u7528\u65f6\u7a97\u53e3\u7559\u5728\u4efb\u52a1\u680f\uff1b\u9000\u51fa\u53ea\u505c\u6b62\u672c\u5e94\u7528\u7ba1\u7406\u7684\u672c\u5730\u6a21\u578b\u3002DSH\u548c\u5176\u4ed6\u5e94\u7528\u72ec\u7acb\u8fd0\u884c\u3002"))
         layout.addWidget(startup)
         scripts, scripts_layout = card("一次性检查脚本")
         self.script_combo = QComboBox()
@@ -1689,9 +1992,9 @@ class MainWindow(QMainWindow):
             if action not in ("exit", "tray"):
                 choice = QMessageBox(self)
                 choice.setWindowTitle(TITLE)
-                choice.setText("关闭 DSH 伴航后，如何处理本应用启动的服务？")
-                choice.setInformativeText("退出会停止本应用启动的模型与 DSH；收起到托盘会继续运行。外部服务不受影响。")
-                exit_button = choice.addButton("退出并停止本应用服务", QMessageBox.ButtonRole.AcceptRole)
+                choice.setText("\u9009\u62e9\u5173\u95ed\u4f34\u822a\u7a97\u53e3\u540e\u7684\u64cd\u4f5c")
+                choice.setInformativeText("\u9000\u51fa\u4f1a\u505c\u6b62\u672c\u5e94\u7528\u7ba1\u7406\u7684\u672c\u5730\u6a21\u578b\uff1b\u6536\u8d77\u5230\u6258\u76d8\u4f1a\u7ee7\u7eed\u8fd0\u884c\u3002DSH\u3001Pi\u548c Harness Desktop \u72ec\u7acb\u8fd0\u884c\uff0c\u9000\u51fa\u4f34\u822a\u4e0d\u4f1a\u5173\u95ed\u5b83\u4eec\u3002")
+                exit_button = choice.addButton("\u9000\u51fa\u5e76\u505c\u6b62\u672c\u5730\u6a21\u578b", QMessageBox.ButtonRole.AcceptRole)
                 tray_button = choice.addButton("收起到托盘，继续运行", QMessageBox.ButtonRole.ActionRole)
                 tray_button.setEnabled(hasattr(self, "tray") and self.tray.isVisible())
                 choice.addButton("取消", QMessageBox.ButtonRole.RejectRole)
@@ -1708,7 +2011,7 @@ class MainWindow(QMainWindow):
                     self._save_close_action_value(action)
             if action == "tray" and hasattr(self, "tray") and self.tray.isVisible():
                 self.hide()
-                self._note("已收起到托盘；模型与 DSH 继续运行。")
+                self._note("\u5df2\u6536\u8d77\u5230\u6258\u76d8\uff1b\u672c\u5730\u6a21\u578b\u548c DSH \u7b49\u5e94\u7528\u90fd\u4f1a\u7ee7\u7eed\u72ec\u7acb\u8fd0\u884c\u3002")
             elif action == "tray":
                 self._note("系统托盘不可用，窗口保持打开。")
             else:
@@ -1795,7 +2098,11 @@ class MainWindow(QMainWindow):
                 details = ", ".join(f"PID {x['pid']} / 端口 {x['port']}" for x in instances)
                 return {"success": False, "message": f"检测到本项目模型已在运行：{details}。请先检查或强制停止指定实例。"}
             return backend.start_model(selected_model, preset_id=preset_id)
-        self._action(work)
+        self._action(work, self._model_start_finished)
+
+    def _model_start_finished(self, result):
+        if not (isinstance(result, dict) and result.get("success")):
+            self._pending_frontend_open = None
 
     def switch_and_start(self):
         if not self.model_session or self.busy or self.quitting or getattr(self.provider_page, "workflow_running", False):
@@ -1893,10 +2200,6 @@ class MainWindow(QMainWindow):
                     return downloads
             except ImportError:
                 pass
-            if self.dsh:
-                cleanup = self.dsh.cleanup()
-                if not cleanup.get("success"):
-                    return cleanup
             if not self.model_session:
                 return {"success": True, "message": "只读窗口已关闭"}
             end = getattr(backend, "end_ui_session", None)
@@ -1942,11 +2245,13 @@ class MainWindow(QMainWindow):
         if data.get("control_read_only"):
             self.read_only_reason = data.get("read_only_reason") or "旧管理器正在控制模型；当前只读。"
         running = bool(data.get("primary_pid"))
-        model = data.get("active_model_name") or self.cfg.get("profiles", {}).get(
-            self.cfg.get("active_profile"), {}).get("alias", "")
+        model = data.get("active_profile_name") or self.cfg.get("profiles", {}).get(
+            self.cfg.get("active_profile"), {}).get("name") or data.get("active_model_name") or ""
         self.detail_label.setText(f"{model} · 本地模型正在运行" if running
                                   else "尚未加载本地模型；请选择下方模型开始。")
         self._update_overview_summary()
+        self._update_frontend_link()
+        self._continue_pending_frontend()
         gpu, ram = data.get("gpu", {}), data.get("ram", {})
         self.metrics_label.setText(
             f"API 端口：{data.get('port', self.cfg.get('default_port'))}     "
@@ -1981,6 +2286,9 @@ class MainWindow(QMainWindow):
         else:
             self.chat_parameters.setText("生效参数：模型未运行")
         self._update_urls()
+        if hasattr(self, "companion_api_address"):
+            api_port = data.get("port") or self.cfg.get("default_port", 24548)
+            self.companion_api_address.setText(f"http://127.0.0.1:{api_port}/v1")
         if hasattr(self, "diagnostic_info"):
             self.diagnostic_info.setText(
                 f"模型：{data.get('state_text', '未知')} · 可识别实例 {len(data.get('model_instances') or [])}\n"
@@ -2002,10 +2310,10 @@ class MainWindow(QMainWindow):
             heading = "正在接入 DSH…"
         elif self.workflow_error:
             heading = "接入未完成"
-        elif model_ready and dsh_ready and self.workflow_ready:
-            heading = "DSH 工作已就绪"
         elif model_ready and dsh_ready:
-            heading = "模型与 DSH 均已运行"
+            heading = "\u672c\u5730\u6a21\u578b\u5df2\u5c31\u7eea \u00b7 DSH \u53ef\u7528"
+        elif model_ready and dsh_ready:
+            heading = "\u672c\u5730\u6a21\u578b\u5df2\u5c31\u7eea \u00b7 DSH \u53ef\u7528"
         elif model_ready:
             heading = "本地模型已就绪"
         elif state == "LOADING":
@@ -2020,11 +2328,13 @@ class MainWindow(QMainWindow):
             "● 正在启动" if state == "LOADING" else
             "● 需要处理" if state == "ERROR" else
             "○ 未运行")
-        self.quick_dsh_state.setText(
-            "● 已连接 · 可打开" if dsh_ready else
-            "● 已运行 · 需原认证链接" if dsh_running else
-            "○ 尚未运行")
-
+        frontend = self._selected_frontend_id()
+        if frontend == "dsh_web":
+            frontend_state = "\u5df2\u8ba4\u8bc1\uff0c\u53ef\u6253\u5f00" if dsh_ready else ("\u8fd0\u884c\u4e2d\uff0c\u9700\u8ba4\u8bc1\u94fe\u63a5" if dsh_running else "\u5c1a\u672a\u8fd0\u884c")
+        else:
+            item = self.companion_app_status.get(frontend) or {}
+            frontend_state = ("\u8fd0\u884c\u4e2d" if item.get("running") else "\u5c1a\u672a\u8fd0\u884c") if item.get("installed") else "\u672a\u5b89\u88c5"
+        self.quick_dsh_state.setText(frontend_state)
     def _update_buttons(self):
         ready = bool(self.last_status)
         running = bool(self.last_status.get("primary_pid"))
@@ -2036,24 +2346,22 @@ class MainWindow(QMainWindow):
                                   and self.cfg.get("server_executable"))
         selected_is_active = (not running or selected_model in (
             self.last_status.get("catalog_model_id"), self.last_status.get("active_profile")))
-        components_ready = bool(self.component_info) and not self.component_info.get("missing")
-        dsh_needs_auth = bool(self.dsh_status.get("running")) and not self.dsh_status.get("can_open")
-        dsh_ready = bool(self.dsh_status.get("running") and self.dsh_status.get("can_open"))
         one_click = (ready and writable and can_start_selected and selected_is_active
-                     and components_ready and not dsh_needs_auth
+                     and not running and not instances
                      and not self.last_status.get("duplicates_detected")
                      and self.last_status.get("state") not in ("LOADING", "ERROR", "EXTERNAL")
                      and not self.busy and not working and not self.quitting)
-        self.start_btn.setEnabled(one_click)
-        # An already-running model/DSH is not proof that its local provider and
-        # new-session default were registered. Keep the idempotent full flow
-        # available so users can attach or repair that last step.
+        can_open_frontend = (ready and writable and can_start_selected and selected_is_active
+                             and (not running or bool(self.last_status.get("api_online")))
+                             and not self.last_status.get("duplicates_detected")
+                             and self.last_status.get("state") not in ("ERROR", "EXTERNAL")
+                             and not self.busy and not working and not self.quitting)
+        self.start_btn.setEnabled(can_open_frontend)
         self.start_btn.setVisible(True)
         self.model_only_start_btn.setEnabled(ready and writable and can_start_selected and not running and not instances and not self.busy and not working and not self.quitting)
         self.switch_btn.setEnabled(ready and writable and can_start_selected and running and not self.busy and not working and not self.quitting)
-        self.stop_btn.setEnabled(ready and ((writable and running) or bool(self.dsh_status.get("owned")))
-                                 and not self.busy and not working and not self.quitting)
-        self.stop_btn.setVisible(running or bool(self.dsh_status.get("owned")))
+        self.stop_btn.setEnabled(ready and writable and running and not self.busy and not working and not self.quitting)
+        self.stop_btn.setVisible(running)
         self.model_only_stop_btn.setEnabled(ready and writable and running and not self.busy and not working and not self.quitting)
         self.restart_btn.setEnabled(ready and writable and running and not self.busy and not working and not self.quitting)
         self.force_model_btn.setEnabled(ready and writable and bool(instances) and not self.busy and not working and not self.quitting)
@@ -2061,10 +2369,6 @@ class MainWindow(QMainWindow):
             guidance = self.read_only_reason or "模型由另一管理器控制；请先接管。"
         elif not can_start_selected:
             guidance = "请先选择可用的 GGUF 模型和推理引擎。"
-        elif not components_ready:
-            guidance = "DSH 或 Node.js 尚未就绪。"
-        elif dsh_needs_auth:
-            guidance = "现有 DSH 需要原认证链接。"
         elif not selected_is_active:
             guidance = "当前运行的是另一模型，请在独立控制中切换。"
         elif self.last_status.get("duplicates_detected"):
@@ -2073,16 +2377,16 @@ class MainWindow(QMainWindow):
             guidance = self.workflow_stage or "正在准备服务，请等待结果。"
         elif self.workflow_error:
             guidance = self.workflow_error
+        elif can_open_frontend and running:
+            guidance = "\u6a21\u578b API \u5df2\u5c31\u7eea\uff0c\u53ef\u6253\u5f00\u6240\u9009\u524d\u7aef\u3002"
         elif one_click:
-            guidance = "准备就绪，可一键启动。"
+            guidance = "\u51c6\u5907\u5c31\u7eea\uff0c\u53ef\u542f\u52a8\u6a21\u578b\u5e76\u6253\u5f00\u6240\u9009\u524d\u7aef\u3002"
         else:
             guidance = "正在读取状态，稍后即可操作。"
         self.prep_hint.setText(guidance)
         self.prep_hint.setVisible(not one_click or bool(self.workflow_error))
         if not self.start_btn.property("busy") == "true":
-            self.start_btn.setToolTip(
-                "启动或复用所选模型，接入 DSH 并设置后续新会话默认模型。"
-                if one_click else guidance)
+            self.start_btn.setToolTip("\u542f\u52a8\u6216\u590d\u7528\u6240\u9009\u672c\u5730\u6a21\u578b\uff0c\u7b49\u5f85 API \u5c31\u7eea\u540e\u6253\u5f00\u6240\u9009\u524d\u7aef\u3002" if can_open_frontend else guidance)
         self.complete_setup_btn.setVisible(not one_click)
         self.take_control_btn.setVisible(not self.model_session)
         self.take_control_btn.setEnabled(not self.busy and not self.quitting)
@@ -2135,6 +2439,7 @@ class MainWindow(QMainWindow):
             self.dsh_state_label.setText(data.get("message") or "DSH 未运行")
         self._update_overview_summary()
         self._update_dsh_buttons()
+        self._update_frontend_link()
         self._update_buttons()
 
     def _update_dsh_buttons(self):
@@ -2147,13 +2452,9 @@ class MainWindow(QMainWindow):
                                       not self.dsh_status.get("instances") and
                                       not self.dsh_status.get("port_occupied") and
                                       not self.dsh_status.get("error"))
-        self.dsh_open_btn.setEnabled(active and running and bool(self.dsh_status.get("can_open")))
-        self.dsh_open_btn.setToolTip(
-            "打开已认证的 DSH 页面。" if running and self.dsh_status.get("can_open") else
-            "现有 DSH 尚未认证：请在“DSH 与提供方”中粘贴其原始认证链接。" if running else
-            "请先启动或连接 DSH。")
         self.dsh_stop_btn.setEnabled(active and running and bool(self.dsh_status.get("owned")))
         self.dsh_force_btn.setEnabled(active and bool(self.dsh_status.get("instances")))
+        self._update_frontend_link()
 
     def start_dsh(self):
         if not self.dsh:

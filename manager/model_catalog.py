@@ -235,6 +235,7 @@ def _row(path: Path, favorite: bool = False, source: str = "local") -> dict:
     model_id = hashlib.sha256(str(first).casefold().encode("utf-8")).hexdigest()[:24]
     return {
         "id": model_id, "name": metadata.get("name") or group_name,
+        "display_name": metadata.get("name") or group_name,
         "path": str(first), "files": [str(p) for p in files],
         "size_bytes": sum(p.stat().st_size for p in files if p.is_file()),
         "architecture": metadata.get("architecture"),
@@ -258,9 +259,11 @@ def list_models(query: str = "", favorites_only: bool = False) -> list[dict]:
         if not all(Path(file).is_file() for file in row.get("files", [])):
             row["complete"] = False
             row["metadata_status"] = "Model file missing; rebind its path"
+    for row in rows:
+        row.setdefault("display_name", row.get("name") or Path(row.get("path", "")).stem)
     term = query.casefold().strip()
     if term:
-        rows = [row for row in rows if term in (row.get("name", "") + " " + row.get("path", "") + " " +
+        rows = [row for row in rows if term in (row.get("display_name", "") + " " + row.get("name", "") + " " + row.get("path", "") + " " +
                                                  str(row.get("architecture") or "") + " " +
                                                  str(row.get("quantization") or "")).casefold()]
     if favorites_only:
@@ -292,6 +295,7 @@ def verify_model(model_id: str) -> dict:
                 or current.get("architecture") != prior.get("architecture")):
             return {"success": False, "message": "Model files or architecture changed; rescan or rebind"}
         current["id"] = model_id
+        current["display_name"] = prior.get("display_name") or prior.get("name") or current["name"]
         return {"success": True, "model": current}
     except (OSError, GGUFError, ValueError) as exc:
         return {"success": False, "message": str(exc)}
@@ -312,6 +316,7 @@ def add_model(path: str | Path) -> dict:
                 row["id"] = existing_id
             previous = db["models"].get(row["id"], {})
             row["favorite"] = bool(previous.get("favorite"))
+            row["display_name"] = previous.get("display_name") or previous.get("name") or row["name"]
             db["models"][row["id"]] = row
             _save_db(db)
         return {"success": True, "model": row, "message": "Model registered"}
@@ -350,6 +355,20 @@ def scan_models(paths: list[str] | None = None) -> dict:
             "incomplete": incomplete, "errors": errors, "models": list_models()}
 
 
+def set_display_name(model_id: str, value: str) -> dict:
+    name = " ".join(str(value or "").split())
+    if not name or len(name) > 120:
+        return {"success": False, "message": "Display name must contain 1\u2013120 characters"}
+    with _lock:
+        db = _read_db()
+        row = db["models"].get(model_id)
+        if not row:
+            return {"success": False, "message": "Model not registered"}
+        row["display_name"] = name
+        _save_db(db)
+    return {"success": True, "model": dict(row), "message": "Display name saved"}
+
+
 def set_favorite(model_id: str, value: bool) -> dict:
     with _lock:
         db = _read_db()
@@ -381,6 +400,7 @@ def rebind_model(model_id: str, path: str | Path) -> dict:
         if other:
             return {"success": False, "message": "Replacement path is already registered"}
         row["id"] = model_id
+        row["display_name"] = prior.get("display_name") or prior.get("name") or row["name"]
         db["models"][model_id] = row
         _save_db(db)
         return {"success": True, "model": row, "message": "Model path rebound; review saved presets before starting",

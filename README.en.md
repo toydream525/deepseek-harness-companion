@@ -3,20 +3,20 @@
 
   # DSH Companion
 
-  **A simpler way to run local models alongside DeepSeek Harness on Windows.**
+  **Start local models with one click on Windows; DSH, Pi WebUI, and Harness Desktop are optional.**
 
   [简体中文](README.md) · English
 
-  `v0.1.0` · `Windows x64` · [`MIT`](LICENSE)
+  `v0.2.0` · `Windows x64` · [`MIT`](LICENSE)
 
-  **[Download installer](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-Setup-v0.1.0-windows-x64.exe)** · [Portable ZIP](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.1.0/DSH-Companion-v0.1.0-windows-x64.zip) · **[Detailed setup](docs/GETTING_STARTED.en.md)** · [Project site](https://yuriaqua.com/harness)
+  **[Download installer](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.2.0/DSH-Companion-Setup-v0.2.0-windows-x64.exe)** · [Portable ZIP](https://github.com/toydream525/deepseek-harness-companion/releases/download/v0.2.0/DSH-Companion-v0.2.0-windows-x64.zip) · **[Detailed setup](docs/GETTING_STARTED.en.md)** · [Project site](https://yuriaqua.com/harness)
 
   <small>For models and runtime requirements, see the <a href="docs/GETTING_STARTED.en.md">detailed setup guide</a>.</small>
 </div>
 
 ![DSH Companion desktop](docs/images/app-preview.png)
 
-Choose a GGUF model, start a local API, try a chat, and manage local or cloud model providers for DSH from one desktop app.
+Start a GGUF local API independently, try a chat, and manage DSH providers when needed. Pi WebUI is the community project [xing-shuyin/pi-web-ui](https://github.com/xing-shuyin/pi-web-ui); Harness Desktop is the standalone official DeepSeek app.
 
 ## What it does
 
@@ -31,7 +31,7 @@ Choose a GGUF model, start a local API, try a chat, and manage local or cloud mo
 
 1. **Install the app.** Run the installer above; for the portable version, fully extract the ZIP before opening `DSH-Companion.exe`.
 2. **Prepare components and a model.** Get a suitable engine from [official llama.cpp releases](https://github.com/ggml-org/llama.cpp/releases), select `llama-server.exe` in the app, and add a GGUF you downloaded from Hugging Face. For DSH, also prepare [Node.js](https://nodejs.org/en/download) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
-3. **Start and verify.** Start the model on the home page and get a real answer in Trial Chat. If you use DSH, complete authenticated connection and provider setup, then verify a new conversation.
+3. **Start and verify.** Start the local model from the home page and get a real answer in Trial Chat. DSH, Pi WebUI, and Harness Desktop are optional and can be managed independently.
 
 Read the [full getting started guide](docs/GETTING_STARTED.en.md), or give the [AI setup task](docs/AI_SETUP.en.md) to an AI assistant to work through on your computer.
 
@@ -56,7 +56,7 @@ Use **Import original prompt setup** inside the app, or choose a launcher in `sc
 
 1. Choose a mode below, **manually download its complete GGUF** from Hugging Face, and prepare a compatible llama.cpp engine and the template named in the guide. Reuse existing files when available.
 2. Add the model under **Model Library & Downloads**, then use **Import original prompt setup** in Workbench. Bind this computer's model and template paths in the preview; missing resources are shown and can be supplied later.
-3. Select the bound preset, start the model, and verify a real answer in Trial Chat. To use DSH, complete the home-page DSH connection and check a new conversation.
+3. Select the bound preset, start the model, and verify a real answer in Trial Chat. To use DSH, configure its provider when needed and check a new conversation.
 
 | Preset | Model type | Reasoning | Best for | Main tradeoff | Model download |
 |---|---|---|---|---|---|
